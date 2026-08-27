@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>侧信道标卡 - 器件选型与固件追踪</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;color:#222;padding:16px;min-height:100vh}
+h1{text-align:center;font-size:20px;font-weight:600;margin-bottom:4px;color:#1a1a1a}
+.subtitle{text-align:center;font-size:12px;color:#888;margin-bottom:14px}
+.toolbar{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.toolbar button{padding:6px 14px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:#333}
+.toolbar button:hover{background:#e8e8e8}
+.toolbar button.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.legend{display:flex;gap:16px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#555}
+.legend-label{border:1px solid transparent;background:transparent;font-size:12px;color:#555;padding:2px 4px;border-radius:4px;width:auto;min-width:60px}
+.legend-label:hover{border-color:#ddd}
+.legend-label:focus{border-color:#2563eb;outline:none;color:#1a1a1a}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.1)}
+.canvas-wrap{max-width:1100px;margin:0 auto;background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px}
+.card-label{font-size:11px;color:#999;margin-bottom:8px}
+.pcie-card{position:relative;width:100%;height:480px;background:#fafafa;border-radius:8px;border:2px solid #d0d0d0;overflow:hidden}
+.pcie-finger{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60%;height:24px;background:linear-gradient(to bottom,#e0e0e0,#b0b0b0);border-radius:0 0 4px 4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#555}
+.component{position:absolute;border:2px solid;border-radius:6px;cursor:grab;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+.component:hover{transform:scale(1.04);z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+.component.dragging{cursor:grabbing;transform:scale(1.06);z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:none}
+.component .resize-handle{position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;z-index:5;opacity:0;transition:opacity .15s}
+.component:hover .resize-handle{opacity:.6}
+.component .resize-handle::after{content:"";position:absolute;bottom:2px;right:2px;width:8px;height:8px;border-right:2px solid #666;border-bottom:2px solid #666;border-radius:0 0 2px 0}
+.component .resize-handle:hover{opacity:1}
+.component .resize-handle:hover::after{border-color:#2563eb}
+.component.resizing{z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:none}
+.component.resizing .resize-handle{opacity:1}
+.component .comp-name{font-size:11px;font-weight:600;color:#1a1a1a}
+.component .comp-model{font-size:9px;margin-top:1px;opacity:.7;color:#333}
+.component .del-btn{position:absolute;top:1px;right:1px;width:15px;height:15px;border-radius:50%;background:#ef4444;color:#fff;font-size:10px;line-height:15px;text-align:center;cursor:pointer;display:none}
+.component.edit-mode .del-btn{display:block}
+.component.sel-for-conn{outline:2px dashed #2563eb;outline-offset:3px}
+.comp-available{background:rgba(34,197,94,.1);border-color:#22c55e}
+.comp-limited{background:rgba(234,179,8,.1);border-color:#eab308}
+.comp-unavailable{background:rgba(239,68,68,.1);border-color:#ef4444}
+.comp-pending{background:rgba(168,85,247,.1);border-color:#a855f7}
+svg.conn-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.conn-line{stroke:#888;stroke-width:1.5;fill:none;pointer-events:stroke;cursor:pointer;stroke-linejoin:round;stroke-linecap:round}
+.conn-line:hover{stroke:#2563eb;stroke-width:2.5}
+.conn-dot{fill:#666;stroke:#fff;stroke-width:1.5;pointer-events:all;cursor:pointer}
+.conn-dot:hover{fill:#2563eb}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border:1px solid #ddd;border-radius:10px;width:90%;max-width:580px;max-height:85vh;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.modal-header{padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1}
+.modal-title{font-size:16px;font-weight:600;color:#1a1a1a}
+.modal-close{background:none;border:none;color:#999;font-size:22px;cursor:pointer}
+.modal-close:hover{color:#333}
+.modal-body{padding:18px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.info-item{background:#f8f8f8;padding:8px 10px;border-radius:5px;border:1px solid #eee}
+.info-label{font-size:10px;color:#999;text-transform:uppercase;margin-bottom:2px}
+.info-value{font-size:13px;color:#333;font-weight:500}
+.section-title{font-size:13px;font-weight:600;margin-bottom:10px;color:#666;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eee;padding-bottom:5px}
+.func-list{list-style:none}
+.func-item{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;background:#f8f8f8;border-radius:5px;border:1px solid #eee;margin-bottom:6px}
+.func-left{flex:1}
+.func-name{font-size:12px;font-weight:500;color:#333}
+.func-desc{font-size:10px;color:#888;margin-top:2px}
+.func-status{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;margin-left:10px}
+.status-ready{background:rgba(34,197,94,.12);color:#16a34a;border:1px solid #22c55e}
+.status-dev{background:rgba(234,179,8,.12);color:#a16207;border:1px solid #eab308}
+.status-todo{background:rgba(239,68,68,.12);color:#dc2626;border:1px solid #ef4444}
+.status-pending{background:rgba(168,85,247,.12);color:#9333ea;border:1px solid #a855f7}
+.summary-bar{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.summary-card{background:#fff;padding:10px 16px;border-radius:6px;border:1px solid #ddd;text-align:center;min-width:100px}
+.summary-num{font-size:22px;font-weight:700;color:#1a1a1a}
+.summary-label{font-size:10px;color:#888;margin-top:2px}
+.add-form{position:absolute;background:#fff;border:1px solid #ccc;border-radius:8px;padding:12px;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.15);width:230px;font-size:12px}
+.add-form label{display:block;margin-bottom:3px;color:#555;font-size:11px}
+.add-form input,.add-form select{width:100%;padding:4px 6px;border:1px solid #ddd;border-radius:4px;margin-bottom:6px;font-size:12px}
+.add-form button{padding:5px 12px;border:1px solid #2563eb;background:#2563eb;color:#fff;border-radius:4px;cursor:pointer;font-size:12px;margin-right:4px}
+.add-form button.cancel{background:#fff;color:#666;border-color:#ccc}
+.hint{font-size:11px;color:#999;text-align:center;margin-top:8px}
+.modal-title-input{font-size:16px;font-weight:600;color:#1a1a1a;border:1px solid transparent;border-radius:4px;padding:2px 6px;width:100%;background:transparent}
+.modal-title-input:hover{border-color:#ddd}
+.modal-title-input:focus{border-color:#2563eb;background:#fff;outline:none}
+.section-title-edit{font-size:13px;font-weight:600;margin-bottom:10px;color:#666;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eee;padding-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.btn-add-sm{padding:3px 10px;border:1px solid #2563eb;background:#2563eb;color:#fff;border-radius:4px;cursor:pointer;font-size:11px;font-weight:400;text-transform:none;letter-spacing:0}
+.btn-add-sm:hover{background:#1d4ed8}
+.param-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.param-row .param-label{flex:0 0 80px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px;background:#f8f8f8}
+.param-row .param-value{flex:1;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px}
+.param-row .param-value:focus,.param-row .param-label:focus{border-color:#2563eb;outline:none}
+.param-row select.param-value{cursor:pointer}
+.param-row .btn-del-sm{flex:0 0 24px;height:24px;border:none;border-radius:4px;background:#ef4444;color:#fff;cursor:pointer;font-size:12px;line-height:24px;text-align:center;padding:0}
+.param-row .btn-del-sm:hover{background:#dc2626}
+.func-row{background:#f8f8f8;border:1px solid #eee;border-radius:6px;padding:10px;margin-bottom:8px}
+.func-row-head{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.func-row-head .fn-name{flex:1;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-weight:500}
+.func-row-head .fn-name:focus{border-color:#2563eb;outline:none}
+.func-row-head select.fn-status{flex:0 0 90px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;cursor:pointer}
+.func-row-head .btn-del-sm{flex:0 0 24px;height:24px;border:none;border-radius:4px;background:#ef4444;color:#fff;cursor:pointer;font-size:12px;line-height:24px;text-align:center;padding:0}
+.func-row-head .btn-del-sm:hover{background:#dc2626}
+.func-row-body{display:flex;gap:6px;flex-wrap:wrap}
+.func-row-body .fn-field{flex:1;min-width:120px}
+.func-row-body .fn-field label{display:block;font-size:10px;color:#999;margin-bottom:2px}
+.func-row-body .fn-field input{width:100%;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px}
+.func-row-body .fn-field input:focus{border-color:#2563eb;outline:none}
+.modal-save-bar{padding:14px 0 0;text-align:right;border-top:1px solid #eee;margin-top:14px}
+.btn-save{padding:8px 24px;border:1px solid #22c55e;background:#22c55e;color:#fff;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-save:hover{background:#16a34a}
+.info-grid-edit{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.param-row-avail{grid-column:1/-1;align-items:center;gap:6px}
+.param-value-avail{flex:1;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px;cursor:pointer;font-weight:500}
+.param-value-avail:focus{border-color:#2563eb;outline:none}
+.avail-color-preview{flex:0 0 20px;width:20px;height:20px;border-radius:4px;border:1px solid #ccc}
+.ctx-menu{display:none;position:fixed;z-index:200;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:160px;padding:4px 0;overflow:hidden}
+.ctx-menu.active{display:block}
+.ctx-menu .ctx-header{padding:6px 14px;font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eee;margin-bottom:4px}
+.ctx-menu .ctx-item{padding:8px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#333}
+.ctx-menu .ctx-item:hover{background:#f0f4ff;color:#2563eb}
+.ctx-menu .ctx-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
+.ctx-menu .ctx-sep{height:1px;background:#eee;margin:4px 0}
+</style>
+</head>
+<body>
+
+<h1>侧信道评估标卡 - 器件选型与固件追踪</h1>
+<p class="subtitle">点击器件查看详情 | 编辑模式可增删器件与连线 | 颜色标注可获得性</p>
+
+<div class="toolbar">
+  <button id="btnView" class="active" onclick="setMode('view')">查看模式</button>
+  <button id="btnEdit" onclick="setMode('edit')">编辑模式</button>
+  <button onclick="showAddForm()">+ 添加器件</button>
+  <button id="btnConn" onclick="startAddConn()">+ 添加连线</button>
+  <button onclick="exportData()">导出JSON</button>
+  <button onclick="document.getElementById('importFile').click()">导入JSON</button>
+  <button onclick="autoLayout()">自动优化布局</button>
+  <button onclick="resetData()">恢复默认</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(34,197,94,.3);border-color:#22c55e"></div><input class="legend-label" data-avail-key="available" value="量产可采购"></div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(234,179,8,.3);border-color:#eab308"></div><input class="legend-label" data-avail-key="limited" value="限量/交期长"></div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,.3);border-color:#ef4444"></div><input class="legend-label" data-avail-key="unavailable" value="未量产/需验证"></div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(168,85,247,.3);border-color:#a855f7"></div><input class="legend-label" data-avail-key="pending" value="待确认"></div>
+</div>
+
+<div class="canvas-wrap">
+  <div class="card-label">PCIe HHHL 标卡俯视图 (167.5 × 68.9 mm) — 白色底板</div>
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="pcie-card" id="pcieCard">
+    <svg class="conn-layer" id="connLayer"></svg>
+    <div class="pcie-finger"></div>
+  </div>
+  <div class="hint" id="hintBar">查看模式：点击器件框查看详情</div>
+</div>
+
+<div class="ctx-menu" id="ctxMenu"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+var nextId = 100;
+var currentMode = "view";
+var connMode = false, connStep = 0, connFrom = null;
+var connections = [];
+var components = [
+  {
+    id:"ctrl-fpga",name:"控制 FPGA",model:"PH1P-35",vendor:"安路科技",package:"FCBG484",power:"2-3W",price:"¥80",
+    availability:"limited",alt:"紫光 PG2L25H",x:3,y:8,w:26,h:42,note:"PCIe Gen3 x4 + RISC-V MCU + SerDes",
+    functions:[
+      {name:"PCIe Endpoint IP (Gen3 x4)",desc:"PCIe 端点，BAR 空间映射，HOST 通信",status:"dev",fw:"安路硬核 IP，需评估板验证",lang:"Verilog",owner:"硬件组"},
+      {name:"DMA Engine",desc:"ADC 数据 DMA 直传 HOST 内存，描述符环",status:"todo",fw:"自研 RTL，未开始",lang:"Verilog",owner:"硬件组"},
+      {name:"SelectMap 配置控制器",desc:"接收 HOST bitstream → 配置主 FPGA",status:"todo",fw:"自研 RTL，未开始",lang:"Verilog",owner:"硬件组"},
+      {name:"Glitch 控制器",desc:"相移时钟参数配置、Glitch 脉冲生成",status:"todo",fw:"自研 RTL + PLL 重配，未开始",lang:"Verilog",owner:"硬件组"},
+      {name:"RISC-V MCU 板管固件",desc:"风扇 PWM、复位、电源切换、温度监控",status:"todo",fw:"C 语言，安路 TD 工具链",lang:"C",owner:"固件组"},
+      {name:"USB 通信 (独立模式)",desc:"UART → FT232 → USB，独立模式配置 FPGA",status:"todo",fw:"复用 RISC-V MCU 固件",lang:"C",owner:"固件组"}
+    ]
+  },
+  {
+    id:"main-fpga",name:"主 FPGA (DUT)",model:"PGL35H",vendor:"紫光同创",package:"FBG484",power:"5-8W",price:"¥150",
+    availability:"limited",alt:"安路 PH1P-50",x:32,y:8,w:30,h:42,note:"350K LUT，PQC 算法余量足",
+    functions:[
+      {name:"PQC 算法核 (Kyber)",desc:"Kyber-768 NTT 加速器，约 30-50K LUT",status:"todo",fw:"参考开源 pqm4/pqcrystals，移植到紫光 PDS",lang:"Verilog",owner:"算法组"},
+      {name:"PQC 算法核 (Dilithium)",desc:"Dilithium-65 NTT 签名，约 40-70K LUT",status:"todo",fw:"参考 ML-DSA-OSH (DATE'26) 开源实现",lang:"Verilog",owner:"算法组"},
+      {name:"SimpleSerial 协议",desc:"兼容 ChipWhisperer API，key/plain/cipher 交互",status:"todo",fw:"参考 CW 开源 simpleserial 模块",lang:"Verilog",owner:"算法组"},
+      {name:"触发生成",desc:"算法开始/结束信号 → ADC 触发",status:"todo",fw:"自研 RTL",lang:"Verilog",owner:"硬件组"},
+      {name:"功耗分流 (XADC)",desc:"shunt 电阻 + XADC 内部监控",status:"dev",fw:"紫光 PGL 自带 ADC 硬核，需适配",lang:"Verilog",owner:"硬件组"},
+      {name:"AES 对标测试核",desc:"AES-128 用于 SCA 精度对标 (vs Husky)",status:"todo",fw:"参考 CW305 AES 开源核",lang:"Verilog",owner:"算法组"}
+    ]
+  },
+  {
+    id:"adc",name:"高速 ADC",model:"ADS4149",vendor:"TI",package:"QFN-48 7×7",power:"265mW",price:"¥120",
+    availability:"available",alt:"ADI AD9230",x:66,y:8,w:14,h:18,note:"14-bit 250MS/s, LVDS",
+    functions:[
+      {name:"功耗采集",desc:"14-bit 250MS/s 采样，437 MB/s LVDS 数据流",status:"dev",fw:"硬件就绪，需写 LVDS 接口 RTL",lang:"Verilog",owner:"硬件组"},
+      {name:"触发模式",desc:"边沿/电平/模拟阈值触发",status:"todo",fw:"控制 FPGA 侧实现触发逻辑",lang:"Verilog",owner:"硬件组"},
+      {name:"增益调节",desc:"可编程增益 0-6dB",status:"todo",fw:"SPI 配置 ADC 寄存器",lang:"C/Verilog",owner:"固件组"}
+    ]
+  },
+  {
+    id:"lna",name:"可变增益 LNA",model:"AD8370",vendor:"ADI",package:"LFCSP-16",power:"350mW",price:"¥45",
+    availability:"available",alt:"—",x:66,y:30,w:14,h:12,note:"-6.5dB ~ +55dB VGA",
+    functions:[
+      {name:"模拟前端放大",desc:"差分 AC 耦合，可调增益 -6.5dB ~ +55dB",status:"dev",fw:"硬件电路设计，无需固件",lang:"—",owner:"硬件组"},
+      {name:"增益控制",desc:"SPI/并行接口数字控制增益",status:"todo",fw:"控制 FPGA 侧 SPI 控制",lang:"Verilog",owner:"硬件组"}
+    ]
+  },
+  {
+    id:"pll",name:"时钟 PLL",model:"SI5340B",vendor:"Silicon Labs",package:"QFN-44",power:"500mW",price:"¥35",
+    availability:"available",alt:"LMX2572",x:66,y:46,w:14,h:10,note:"相移 + 整数倍时钟",
+    functions:[
+      {name:"采样时钟生成",desc:"目标时钟整数倍 PLL 生成",status:"dev",fw:"I2C 配置 PLL 寄存器",lang:"C",owner:"固件组"},
+      {name:"相移 Glitch 时钟",desc:"相移参数配置，支持片上时钟 Glitch",status:"todo",fw:"控制 FPGA Glitch 控制器联动",lang:"Verilog",owner:"硬件组"}
+    ]
+  },
+  {
+    id:"usb",name:"USB 转换",model:"FT232HL",vendor:"FTDI",package:"QFN-32",power:"200mW",price:"¥15",
+    availability:"available",alt:"CH347",x:3,y:54,w:12,h:14,note:"独立模式 USB 通信",
+    functions:[
+      {name:"UART 转 USB",desc:"独立模式下与外部电脑通信",status:"ready",fw:"FTDI 官方驱动，无需开发",lang:"—",owner:"—"}
+    ]
+  },
+  {
+    id:"sram",name:"SRAM (FIFO)",model:"IS66WV4M16BLL",vendor:"ISSI",package:"BGA-54",power:"150mW",price:"¥18",
+    availability:"available",alt:"—",x:3,y:72,w:12,h:12,note:"4MB DMA FIFO 缓冲",
+    functions:[
+      {name:"DMA FIFO 缓冲",desc:"应对 HOST 突发延迟，4MB 环形缓冲",status:"todo",fw:"控制 FPGA 侧 FIFO 控制器 RTL",lang:"Verilog",owner:"硬件组"}
+    ]
+  },
+  {
+    id:"flash-ctrl",name:"Flash (控制)",model:"W25Q128JVS",vendor:"Winbond",package:"SOIC-8",power:"—",price:"¥6",
+    availability:"available",alt:"—",x:18,y:54,w:10,h:12,note:"控制 FPGA 配置存储",
+    functions:[
+      {name:"配置存储",desc:"控制 FPGA bitstream 固化存储",status:"ready",fw:"安路 TD 工具链支持，无需开发",lang:"—",owner:"—"}
+    ]
+  },
+  {
+    id:"flash-main",name:"Flash (主)",model:"W25Q128JVS",vendor:"Winbond",package:"SOIC-8",power:"—",price:"¥6",
+    availability:"available",alt:"—",x:18,y:70,w:10,h:12,note:"主 FPGA 配置存储",
+    functions:[
+      {name:"配置存储",desc:"主 FPGA bitstream 固化存储",status:"ready",fw:"紫光 PDS 工具链支持，无需开发",lang:"—",owner:"—"}
+    ]
+  },
+  {
+    id:"sma",name:"SMA 接口",model:"SMA-KHD ×4",vendor:"中航",package:"面板装",power:"—",price:"¥32",
+    availability:"available",alt:"—",x:84,y:54,w:12,h:30,note:"触发In/Out, 功耗Out, GlitchOut",
+    functions:[
+      {name:"触发输入/输出",desc:"外部触发信号接入 / 内部触发输出",status:"ready",fw:"硬件接口，无需固件",lang:"—",owner:"硬件组"},
+      {name:"功耗信号输出",desc:"shunt 信号经 LNA 后通过 SMA 输出至示波器",status:"ready",fw:"硬件接口，无需固件",lang:"—",owner:"硬件组"},
+      {name:"Glitch 时钟输出",desc:"相移 Glitch 时钟信号输出",status:"todo",fw:"控制 FPGA Glitch 控制器联动",lang:"Verilog",owner:"硬件组"}
+    ]
+  },
+  {
+    id:"fan",name:"风扇",model:"4020 12V 薄型",vendor:"—",package:"40×40×10mm",power:"1-2W",price:"¥15",
+    availability:"available",alt:"—",x:84,y:8,w:12,h:18,note:"散热风扇",
+    functions:[
+      {name:"PWM 风扇控制",desc:"根据 FPGA 温度自动调节转速",status:"todo",fw:"RISC-V MCU 固件 PID 控制",lang:"C",owner:"固件组"},
+      {name:"温度保护",desc:"过温自动关断 FPGA 电源",status:"todo",fw:"RISC-V MCU 固件",lang:"C",owner:"固件组"}
+    ]
+  },
+  {
+    id:"power",name:"电源管理",model:"TPS54A20 + TPS62173 + TPS62175 + LM5060",vendor:"TI",package:"多封装",power:"1-2W(损耗)",price:"¥55",
+    availability:"available",alt:"—",x:32,y:54,w:48,h:28,note:"DC-DC + LDO + 电源切换",
+    functions:[
+      {name:"12V→3.3V 主电源",desc:"PCIe 12V 或外部 DC 输入 → 3.3V 总线",status:"ready",fw:"硬件电路，无需固件",lang:"—",owner:"硬件组"},
+      {name:"VCC-INT 主 FPGA 调压",desc:"0.9-1.1V 可调，支持 SCA 去耦电容实验",status:"dev",fw:"RISC-V MCU 通过 I2C DAC 控制",lang:"C",owner:"固件组"},
+      {name:"VCC-INT 控制 FPGA",desc:"1.2V 核心电压",status:"ready",fw:"硬件电路，无需固件",lang:"—",owner:"硬件组"},
+      {name:"PCIe/外部 DC 电源切换",desc:"插卡模式 PCIe 供电 ↔ 独立模式外部 DC 供电",status:"dev",fw:"LM5060 自动切换 + MCU 监控",lang:"C",owner:"固件组"},
+      {name:"上电时序控制",desc:"主 FPGA 上电时序 (VCCINT→VCCAUX→VCCIO)",status:"todo",fw:"RISC-V MCU 固件",lang:"C",owner:"固件组"}
+    ]
+  },
+  {
+    id:"shunt",name:"检流电阻",model:"1Ω 0.1% 1206",vendor:"—",package:"1206",power:"—",price:"¥2",
+    availability:"available",alt:"—",x:32,y:86,w:10,h:8,note:"shunt 功耗测量",
+    functions:[
+      {name:"功耗分流测量",desc:"VCC-INT 串联检流电阻，测功耗侧信道",status:"dev",fw:"硬件电路，无需固件",lang:"—",owner:"硬件组"}
+    ]
+  },
+  {
+    id:"host-sw",name:"HOST 软件",model:"—",vendor:"—",package:"—",power:"—",price:"—",
+    availability:"pending",alt:"—",x:3,y:86,w:26,h:8,note:"HOST 侧软件栈",
+    functions:[
+      {name:"PCIe VFIO 驱动",desc:"Linux PCIe 驱动，BAR 映射、DMA 缓冲分配",status:"todo",fw:"Linux 内核模块",lang:"C",owner:"驱动组"},
+      {name:"lib sca-core",desc:"统一 API：配置 FPGA、启动采集、回读 trace",status:"todo",fw:"C/C++ 共享库",lang:"C++",owner:"软件组"},
+      {name:"采集分析软件",desc:"TVLA/CPA/模板攻击，自动化流水线",status:"todo",fw:"Python + NumPy/SciPy",lang:"Python",owner:"软件组"},
+      {name:"综合调度器",desc:"调用 EDA 工具综合 bit 文件",status:"todo",fw:"Shell/Python 脚本",lang:"Python",owner:"软件组"},
+      {name:"fpga-manager",desc:"内核 fpga-manager 框架集成",status:"todo",fw:"Linux 内核",lang:"C",owner:"驱动组"}
+    ]
+  }
+];
+
+var statusLabels = {
+  ready: "已就绪",
+  dev: "开发中",
+  todo: "未开始",
+  pending: "待确认"
+};
+
+var availLabels = {
+  available: "量产可采购",
+  limited: "限量/交期长",
+  unavailable: "未量产/需验证",
+  pending: "待确认"
+};
+
+function renderCard() {
+  var card = document.getElementById("pcieCard");
+  var cardH = card.clientHeight;
+  var cardW = card.clientWidth;
+  document.querySelectorAll(".component").forEach(function(e){e.remove();});
+  components.forEach(function(c) {
+    var el = document.createElement("div");
+    el.className = "component comp-" + c.availability;
+    if (currentMode === "edit") el.classList.add("edit-mode");
+    el.dataset.id = c.id;
+    el.style.left = (c.x * cardW / 100) + "px";
+    el.style.top = (c.y * cardH / 100) + "px";
+    el.style.width = (c.w * cardW / 100) + "px";
+    el.style.height = (c.h * cardH / 100) + "px";
+    el.innerHTML = '<div class="comp-name">' + c.name + '</div><div class="comp-model">' + c.model + '</div><div class="del-btn" onclick="event.stopPropagation();delComp(\'' + c.id + '\')">×</div><div class="resize-handle"></div>';
+    el.onclick = function(e) { onCompClick(c); };
+    el.oncontextmenu = function(e) { showCtxMenu(e, c.id); };
+    enableDrag(el, c, card);
+    enableResize(el, c, card);
+    card.appendChild(el);
+  });
+  renderConns();
+}
+
+/* ===== 器件框拖拽 ===== */
+function enableDrag(el, comp, card) {
+  var dragData = null;
+  var DRAG_THRESHOLD = 4; /* 像素，超过才算拖拽，避免误触 */
+
+  function onPointerDown(e) {
+    /* 编辑模式下点击删除按钮不触发拖拽 */
+    if (e.target.classList.contains("del-btn")) return;
+    /* 调整大小手柄不触发拖拽 */
+    if (e.target.classList.contains("resize-handle")) return;
+    /* 连线模式下不拖拽 */
+    if (connMode) return;
+
+    e.preventDefault();
+    var rect = card.getBoundingClientRect();
+    var px, py;
+    if (e.touches && e.touches.length > 0) {
+      px = e.touches[0].clientX; py = e.touches[0].clientY;
+    } else {
+      px = e.clientX; py = e.clientY;
+    }
+    dragData = {
+      startX: px, startY: py,
+      origX: comp.x, origY: comp.y,
+      cardW: card.clientWidth, cardH: card.clientHeight,
+      moved: false
+    };
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("touchmove", onPointerMove, {passive:false});
+    document.addEventListener("touchend", onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!dragData) return;
+    e.preventDefault();
+    var px, py;
+    if (e.touches && e.touches.length > 0) {
+      px = e.touches[0].clientX; py = e.touches[0].clientY;
+    } else {
+      px = e.clientX; py = e.clientY;
+    }
+    var dxPx = px - dragData.startX;
+    var dyPx = py - dragData.startY;
+
+    if (!dragData.moved && Math.abs(dxPx) < DRAG_THRESHOLD && Math.abs(dyPx) < DRAG_THRESHOLD) return;
+
+    if (!dragData.moved) {
+      dragData.moved = true;
+      el.classList.add("dragging");
+    }
+
+    var dxPct = dxPx / dragData.cardW * 100;
+    var dyPct = dyPx / dragData.cardH * 100;
+    var newX = dragData.origX + dxPct;
+    var newY = dragData.origY + dyPct;
+    /* 限制在画布范围内 */
+    newX = Math.max(0, Math.min(100 - comp.w, newX));
+    newY = Math.max(0, Math.min(100 - comp.h, newY));
+    comp.x = newX;
+    comp.y = newY;
+    el.style.left = (newX * dragData.cardW / 100) + "px";
+    el.style.top = (newY * dragData.cardH / 100) + "px";
+    /* 实时刷新连线 */
+    renderConns();
+  }
+
+  function onPointerUp(e) {
+    document.removeEventListener("pointermove", onPointerMove);
+    document.removeEventListener("pointerup", onPointerUp);
+    document.removeEventListener("touchmove", onPointerMove);
+    document.removeEventListener("touchend", onPointerUp);
+    if (dragData && dragData.moved) {
+      el.classList.remove("dragging");
+      /* 拖拽过则不触发点击 */
+      var wasMoved = true;
+      el._dragged = wasMoved;
+      setTimeout(function(){ el._dragged = false; }, 50);
+      autoSave();
+    }
+    dragData = null;
+  }
+
+  /* 拦截点击：如果刚拖拽过，阻止 click 事件 */
+  el.addEventListener("click", function(e) {
+    if (el._dragged) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }, true);
+
+  el.addEventListener("pointerdown", onPointerDown);
+  el.addEventListener("touchstart", onPointerDown, {passive:false});
+}
+
+/* ===== 器件框调整大小 ===== */
+function enableResize(el, comp, card) {
+  var handle = el.querySelector(".resize-handle");
+  if (!handle) return;
+  var resizeData = null;
+  var MIN_W = 5, MIN_H = 5; /* 最小宽高百分比 */
+
+  function onResizeDown(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var px, py;
+    if (e.touches && e.touches.length > 0) {
+      px = e.touches[0].clientX; py = e.touches[0].clientY;
+    } else {
+      px = e.clientX; py = e.clientY;
+    }
+    resizeData = {
+      startX: px, startY: py,
+      origW: comp.w, origH: comp.h,
+      origX: comp.x, origY: comp.y,
+      cardW: card.clientWidth, cardH: card.clientHeight,
+      moved: false
+    };
+    el.classList.add("resizing");
+    document.addEventListener("pointermove", onResizeMove);
+    document.addEventListener("pointerup", onResizeUp);
+    document.addEventListener("touchmove", onResizeMove, {passive:false});
+    document.addEventListener("touchend", onResizeUp);
+  }
+
+  function onResizeMove(e) {
+    if (!resizeData) return;
+    e.preventDefault();
+    var px, py;
+    if (e.touches && e.touches.length > 0) {
+      px = e.touches[0].clientX; py = e.touches[0].clientY;
+    } else {
+      px = e.clientX; py = e.clientY;
+    }
+    var dxPx = px - resizeData.startX;
+    var dyPx = py - resizeData.startY;
+    var dxPct = dxPx / resizeData.cardW * 100;
+    var dyPct = dyPx / resizeData.cardH * 100;
+
+    resizeData.moved = true;
+
+    var newW = resizeData.origW + dxPct;
+    var newH = resizeData.origH + dyPct;
+    /* 限制最小大小 */
+    newW = Math.max(MIN_W, newW);
+    newH = Math.max(MIN_H, newH);
+    /* 限制不超出画布右下边界 */
+    newW = Math.min(newW, 100 - comp.x);
+    newH = Math.min(newH, 100 - comp.y);
+
+    comp.w = newW;
+    comp.h = newH;
+    el.style.width = (newW * resizeData.cardW / 100) + "px";
+    el.style.height = (newH * resizeData.cardH / 100) + "px";
+    /* 实时刷新连线 */
+    renderConns();
+  }
+
+  function onResizeUp(e) {
+    document.removeEventListener("pointermove", onResizeMove);
+    document.removeEventListener("pointerup", onResizeUp);
+    document.removeEventListener("touchmove", onResizeMove);
+    document.removeEventListener("touchend", onResizeUp);
+    el.classList.remove("resizing");
+    if (resizeData && resizeData.moved) {
+      el._dragged = true;
+      setTimeout(function(){ el._dragged = false; }, 50);
+      autoSave();
+    }
+    resizeData = null;
+  }
+
+  handle.addEventListener("pointerdown", onResizeDown);
+  handle.addEventListener("touchstart", onResizeDown, {passive:false});
+}
+
+/* ===== 右键菜单：快速切换可获得性 ===== */
+var ctxTargetId = null;
+var ctxColorMap = {
+  available: "rgba(34,197,94,.3)",
+  limited: "rgba(234,179,8,.3)",
+  unavailable: "rgba(239,68,68,.3)",
+  pending: "rgba(168,85,247,.3)"
+};
+var availBorderMap = {
+  available: "#22c55e",
+  limited: "#eab308",
+  unavailable: "#ef4444",
+  pending: "#a855f7"
+};
+
+function previewAvailColor(sel) {
+  var key = sel.value;
+  var preview = sel.parentElement.querySelector(".avail-color-preview");
+  if (preview) {
+    preview.style.background = ctxColorMap[key] || "#ccc";
+    preview.style.borderColor = availBorderMap[key] || "#ccc";
+  }
+}
+
+function showCtxMenu(e, compId) {
+  e.preventDefault();
+  e.stopPropagation();
+  ctxTargetId = compId;
+  var menu = document.getElementById("ctxMenu");
+  var c = components.find(function(x){return x.id === compId;});
+  if (!c) return;
+  var html = '<div class="ctx-header">切换：' + c.name + '</div>';
+  Object.keys(availLabels).forEach(function(key) {
+    var active = c.availability === key;
+    html += '<div class="ctx-item" onclick="setAvailability(\'' + key + '\')">' +
+      '<div class="ctx-dot" style="background:' + ctxColorMap[key] + '"></div>' +
+      availLabels[key] + (active ? ' ✓' : '') + '</div>';
+  });
+  html += '<div class="ctx-sep"></div>';
+  html += '<div class="ctx-item" onclick="openModalById(\'' + compId + '\')">编辑详情...</div>';
+  menu.innerHTML = html;
+  menu.classList.add("active");
+  /* 定位 */
+  var mx = e.clientX, my = e.clientY;
+  var mw = 170, mh = menu.scrollHeight || 200;
+  if (mx + mw > window.innerWidth) mx = window.innerWidth - mw - 8;
+  if (my + mh > window.innerHeight) my = window.innerHeight - mh - 8;
+  menu.style.left = mx + "px";
+  menu.style.top = my + "px";
+}
+
+function hideCtxMenu() {
+  document.getElementById("ctxMenu").classList.remove("active");
+  ctxTargetId = null;
+}
+
+function setAvailability(key) {
+  if (!ctxTargetId) return;
+  var c = components.find(function(x){return x.id === ctxTargetId;});
+  if (c) {
+    c.availability = key;
+    renderCard();
+    renderSummary();
+    autoSave();
+    document.getElementById("hintBar").textContent = c.name + " → " + availLabels[key];
+  }
+  hideCtxMenu();
+}
+
+function openModalById(id) {
+  hideCtxMenu();
+  var c = components.find(function(x){return x.id === id;});
+  if (c) openModal(c);
+}
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest("#ctxMenu")) hideCtxMenu();
+});
+document.addEventListener("contextmenu", function(e) {
+  if (!e.target.closest(".component")) hideCtxMenu();
+});
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") hideCtxMenu();
+});
+
+function onCompClick(c) {
+  if (connMode && connStep === 0) {
+    connFrom = c.id;
+    connStep = 1;
+    document.querySelector('[data-id="' + c.id + '"]').classList.add("sel-for-conn");
+    document.getElementById("hintBar").textContent = "已选 " + c.name + "，点击目标器件完成连线";
+  } else if (connMode && connStep === 1) {
+    if (c.id !== connFrom) {
+      connections.push({from: connFrom, to: c.id});
+      renderConns();
+      autoSave();
+    }
+    connMode = false; connStep = 0; connFrom = null;
+    document.querySelectorAll(".sel-for-conn").forEach(function(e){e.classList.remove("sel-for-conn");});
+    document.getElementById("btnConn").classList.remove("active");
+    document.getElementById("hintBar").textContent = "连线已添加";
+  } else {
+    openModal(c);
+  }
+}
+
+/* ===== 连线路由：绕过器件框、不重叠、美观 ===== */
+
+function expandRect(r, pad) {
+  return {x: r.x - pad, y: r.y - pad, w: r.w + 2*pad, h: r.h + 2*pad};
+}
+
+function rectsOverlap(a, b) {
+  return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+}
+
+function pointInRect(px, py, r) {
+  return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+}
+
+function segIntersectsRect(x1, y1, x2, y2, r) {
+  if (pointInRect(x1, y1, r) || pointInRect(x2, y2, r)) return true;
+  if (x1 === x2) {
+    var minY = Math.min(y1,y2), maxY = Math.max(y1,y2);
+    return x1 >= r.x && x1 <= r.x + r.w && maxY >= r.y && minY <= r.y + r.h;
+  }
+  if (y1 === y2) {
+    var minX = Math.min(x1,x2), maxX = Math.max(x1,x2);
+    return y1 >= r.y && y1 <= r.y + r.h && maxX >= r.x && minX <= r.x + r.w;
+  }
+  return false;
+}
+
+function pathIntersectsRects(path, rects) {
+  for (var i = 0; i < path.length - 1; i++) {
+    for (var j = 0; j < rects.length; j++) {
+      if (segIntersectsRect(path[i].x, path[i].y, path[i+1].x, path[i+1].y, rects[j])) return true;
+    }
+  }
+  return false;
+}
+
+function getCompRect(c, w, h) {
+  return {x: c.x * w / 100, y: c.y * h / 100, w: c.w * w / 100, h: c.h * h / 100};
+}
+
+function getEdgePoint(c, w, h, tx, ty) {
+  var rect = getCompRect(c, w, h);
+  var cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
+  var dx = tx - cx, dy = ty - cy;
+  if (dx === 0 && dy === 0) return {x: cx, y: cy};
+  var scale;
+  if (Math.abs(dx) / Math.max(rect.w, 1) > Math.abs(dy) / Math.max(rect.h, 1)) {
+    scale = (rect.w / 2) / Math.abs(dx);
+  } else {
+    scale = (rect.h / 2) / Math.abs(dy);
+  }
+  return {x: cx + dx * scale, y: cy + dy * scale};
+}
+
+/* L 形折线：先水平后垂直 / 先垂直后水平 */
+function tryLRoute(s, d, rects, firstHorizontal) {
+  var mid;
+  if (firstHorizontal) {
+    mid = {x: d.x, y: s.y};
+  } else {
+    mid = {x: s.x, y: d.y};
+  }
+  var path = [s, mid, d];
+  if (!pathIntersectsRects(path, rects)) return path;
+  return null;
+}
+
+/* Z 形折线：两段水平 + 中间垂直 / 两段垂直 + 中间水平 */
+function tryZRoute(s, d, rects, horizontal) {
+  var candidates = [];
+  if (horizontal) {
+    var midX = (s.x + d.x) / 2;
+    candidates = [
+      [{x:s.x,y:s.y},{x:midX,y:s.y},{x:midX,y:d.y},{x:d.x,y:d.y}],
+      [{x:s.x,y:s.y},{x:s.x+(d.x-s.x)*0.3,y:s.y},{x:s.x+(d.x-s.x)*0.3,y:d.y},{x:d.x,y:d.y}],
+      [{x:s.x,y:s.y},{x:s.x+(d.x-s.x)*0.7,y:s.y},{x:s.x+(d.x-s.x)*0.7,y:d.y},{x:d.x,y:d.y}],
+    ];
+  } else {
+    var midY = (s.y + d.y) / 2;
+    candidates = [
+      [{x:s.x,y:s.y},{x:s.x,y:midY},{x:d.x,y:midY},{x:d.x,y:d.y}],
+      [{x:s.x,y:s.y},{x:s.x,y:s.y+(d.y-s.y)*0.3},{x:d.x,y:s.y+(d.y-s.y)*0.3},{x:d.x,y:d.y}],
+      [{x:s.x,y:s.y},{x:s.x,y:s.y+(d.y-s.y)*0.7},{x:d.x,y:s.y+(d.y-s.y)*0.7},{x:d.x,y:d.y}],
+    ];
+  }
+  for (var i = 0; i < candidates.length; i++) {
+    if (!pathIntersectsRects(candidates[i], rects)) return candidates[i];
+  }
+  return null;
+}
+
+/* 外部绕行：走画布边缘 */
+function tryEdgeRoute(s, d, rects, w, h) {
+  var margin = 6;
+  var routes = [
+    [{x:s.x,y:s.y},{x:s.x,y:margin},{x:d.x,y:margin},{x:d.x,y:d.y}],
+    [{x:s.x,y:s.y},{x:s.x,y:h-margin},{x:d.x,y:h-margin},{x:d.x,y:d.y}],
+    [{x:s.x,y:s.y},{x:margin,y:s.y},{x:margin,y:d.y},{x:d.x,y:d.y}],
+    [{x:s.x,y:s.y},{x:w-margin,y:s.y},{x:w-margin,y:d.y},{x:d.x,y:d.y}],
+    [{x:s.x,y:s.y},{x:s.x,y:margin},{x:w-margin,y:margin},{x:w-margin,y:d.y},{x:d.x,y:d.y}],
+    [{x:s.x,y:s.y},{x:s.x,y:h-margin},{x:margin,y:h-margin},{x:margin,y:d.y},{x:d.x,y:d.y}],
+  ];
+  for (var i = 0; i < routes.length; i++) {
+    if (!pathIntersectsRects(routes[i], rects)) return routes[i];
+  }
+  return null;
+}
+
+function routePath(s, d, rects, w, h) {
+  if (rects.length === 0) return [s, d];
+  var path;
+  path = tryLRoute(s, d, rects, true);
+  if (path) return path;
+  path = tryLRoute(s, d, rects, false);
+  if (path) return path;
+  path = tryZRoute(s, d, rects, true);
+  if (path) return path;
+  path = tryZRoute(s, d, rects, false);
+  if (path) return path;
+  path = tryEdgeRoute(s, d, rects, w, h);
+  if (path) return path;
+  return [s, d];
+}
+
+function pathToD(path) {
+  if (path.length < 2) return "";
+  var d = "M " + path[0].x.toFixed(1) + " " + path[0].y.toFixed(1);
+  for (var i = 1; i < path.length; i++) {
+    d += " L " + path[i].x.toFixed(1) + " " + path[i].y.toFixed(1);
+  }
+  return d;
+}
+
+function renderConns() {
+  var svg = document.getElementById("connLayer");
+  svg.innerHTML = "";
+  var card = document.getElementById("pcieCard");
+  var w = card.clientWidth, h = card.clientHeight;
+  var pad = 4;
+
+  /* 构建障碍矩形列表（所有器件框，膨胀 pad 像素） */
+  var obsRects = components.map(function(c) {
+    return expandRect(getCompRect(c, w, h), pad);
+  });
+
+  connections.forEach(function(conn, idx) {
+    var c1 = components.find(function(c){return c.id === conn.from;});
+    var c2 = components.find(function(c){return c.id === conn.to;});
+    if (!c1 || !c2) return;
+
+    var center1 = {x: (c1.x + c1.w/2) * w / 100, y: (c1.y + c1.h/2) * h / 100};
+    var center2 = {x: (c2.x + c2.w/2) * w / 100, y: (c2.y + c2.h/2) * h / 100};
+
+    /* 起点/终点从器件边缘出发 */
+    var s = getEdgePoint(c1, w, h, center2.x, center2.y);
+    var d = getEdgePoint(c2, w, h, center1.x, center1.y);
+
+    /* 排除起点和终点自身器件框（连线可以贴着自己的边缘） */
+    var obs = obsRects.filter(function(r, i) {
+      return components[i].id !== c1.id && components[i].id !== c2.id;
+    });
+
+    var path = routePath(s, d, obs, w, h);
+
+    /* 绘制路径 */
+    var pEl = document.createElementNS("http://www.w3.org/2000/svg","path");
+    pEl.setAttribute("d", pathToD(path));
+    pEl.setAttribute("class","conn-line");
+    /* 透明加粗路径用于点击 */
+    pEl.style.pointerEvents = "stroke";
+    pEl.onclick = function(e){ e.stopPropagation(); delConn(idx); };
+    svg.appendChild(pEl);
+
+    /* 中点圆点 */
+    var midIdx = Math.floor(path.length / 2);
+    var mid = path[midIdx];
+    var circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    circle.setAttribute("cx", mid.x);
+    circle.setAttribute("cy", mid.y);
+    circle.setAttribute("r", 5);
+    circle.setAttribute("class","conn-dot");
+    circle.onclick = function(e){ e.stopPropagation(); delConn(idx); };
+    svg.appendChild(circle);
+  });
+}
+
+function delConn(idx) {
+  if (!confirm("删除这条连线？")) return;
+  connections.splice(idx, 1);
+  renderConns();
+  autoSave();
+}
+
+function setMode(m) {
+  currentMode = m;
+  document.getElementById("btnView").classList.toggle("active", m === "view");
+  document.getElementById("btnEdit").classList.toggle("active", m === "edit");
+  document.querySelectorAll(".component").forEach(function(el){
+    el.classList.toggle("edit-mode", m === "edit");
+  });
+  document.getElementById("hintBar").textContent = m === "edit"
+    ? "编辑模式：点击器件红色×删除 | 顶部按钮添加器件/连线"
+    : "查看模式：点击器件框查看详情";
+}
+
+function startAddConn() {
+  connMode = true; connStep = 0; connFrom = null;
+  document.getElementById("btnConn").classList.add("active");
+  document.getElementById("hintBar").textContent = "连线模式：点击第一个器件";
+}
+
+function delComp(id) {
+  if (!confirm("删除此器件？")) return;
+  components = components.filter(function(c){return c.id !== id;});
+  connections = connections.filter(function(c){return c.from !== id && c.to !== id;});
+  renderCard();
+  renderSummary();
+  autoSave();
+}
+
+function showAddForm() {
+  var existing = document.getElementById("addForm");
+  if (existing) existing.remove();
+  var form = document.createElement("div");
+  form.id = "addForm";
+  form.className = "add-form";
+  form.style.left = "40%";
+  form.style.top = "120px";
+  form.innerHTML =
+    '<label>名称</label><input id="nf-name" value="新器件">' +
+    '<label>型号</label><input id="nf-model" value="—">' +
+    '<label>可获得性</label><select id="nf-avail"><option value="available">量产可采购</option><option value="limited">限量/交期长</option><option value="unavailable">未量产</option><option value="pending">待确认</option></select>' +
+    '<label>X% (0-90)</label><input type="number" id="nf-x" value="40" min="0" max="90">' +
+    '<label>Y% (0-90)</label><input type="number" id="nf-y" value="40" min="0" max="90">' +
+    '<label>宽%</label><input type="number" id="nf-w" value="15" min="5" max="50">' +
+    '<label>高%</label><input type="number" id="nf-h" value="15" min="5" max="50">' +
+    '<button onclick="addComp()">确定</button><button class="cancel" onclick="document.getElementById(\'addForm\').remove()">取消</button>';
+  document.body.appendChild(form);
+}
+
+function addComp() {
+  var id = "comp-" + (nextId++);
+  components.push({
+    id: id,
+    name: document.getElementById("nf-name").value || "新器件",
+    model: document.getElementById("nf-model").value || "—",
+    vendor:"—", package:"—", power:"—", price:"—",
+    availability: document.getElementById("nf-avail").value,
+    alt:"—",
+    x: parseFloat(document.getElementById("nf-x").value)||40,
+    y: parseFloat(document.getElementById("nf-y").value)||40,
+    w: parseFloat(document.getElementById("nf-w").value)||15,
+    h: parseFloat(document.getElementById("nf-h").value)||15,
+    note:"自定义添加",
+    functions:[]
+  });
+  document.getElementById("addForm").remove();
+  renderCard();
+  renderSummary();
+  autoSave();
+}
+
+function exportData() {
+  var data = JSON.stringify({components: components, connections: connections}, null, 2);
+  var blob = new Blob([data], {type: "application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "器件选型追踪.json";
+  a.click();
+}
+
+function importData(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var data = JSON.parse(ev.target.result);
+      if (data.components) components = data.components;
+      if (data.connections) connections = data.connections;
+      autoSave();
+      renderCard();
+      renderSummary();
+    } catch(err) { alert("导入失败: " + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function openModal(c) {
+  var titleEl = document.getElementById("modalTitle");
+  titleEl.innerHTML = '<input class="modal-title-input" id="editTitle" value="' + c.name + ' — ' + c.model + '">';
+  var body = document.getElementById("modalBody");
+  var html = "";
+
+  /* 参数列表区 */
+  html += '<div class="section-title-edit"><span>器件参数</span><button class="btn-add-sm" onclick="addParamRow()">+ 新增参数</button></div>';
+  html += '<div id="paramList" class="info-grid-edit">';
+
+  /* 遍历组件对象的所有非 functions 字段 */
+  var paramFields = [
+    {key:"name", label:"名称"},
+    {key:"model", label:"型号"},
+    {key:"vendor", label:"厂商"},
+    {key:"package", label:"封装"},
+    {key:"power", label:"功耗"},
+    {key:"price", label:"单价"},
+    {key:"availability", label:"可获得性", type:"select", options:availLabels},
+    {key:"alt", label:"替代料"},
+    {key:"note", label:"备注"}
+  ];
+  paramFields.forEach(function(p) {
+    var val = c[p.key] || "";
+    if (p.type === "select") {
+      html += '<div class="param-row param-row-avail"><input class="param-label" value="' + p.label + '" data-param-key="' + p.key + '" data-param-type="select" data-param-label="' + p.label + '" readonly>';
+      html += '<select class="param-value param-value-avail" data-param-key="' + p.key + '" data-param-type="select" onchange="previewAvailColor(this)">';
+      Object.keys(p.options).forEach(function(k) {
+        html += '<option value="' + k + '"' + (c[p.key] === k ? ' selected' : '') + '>' + p.options[k] + '</option>';
+      });
+      html += '</select>';
+      html += '<div class="avail-color-preview" style="background:' + (ctxColorMap[c[p.key]] || '#ccc') + ';border:1px solid ' + (availBorderMap[c[p.key]] || '#ccc') + '"></div>';
+      html += '</div>';
+    } else {
+      html += '<div class="param-row"><input class="param-label" value="' + p.label + '" data-param-key="' + p.key + '" data-param-label="' + p.label + '" readonly>';
+      html += '<input class="param-value" data-param-key="' + p.key + '" value="' + escapeAttr(val) + '"></div>';
+    }
+  });
+
+  /* 额外的自定义参数 */
+  if (c.customParams) {
+    c.customParams.forEach(function(p) {
+      html += '<div class="param-row"><input class="param-label" value="' + escapeAttr(p.label) + '" data-param-custom="1" data-param-label="' + escapeAttr(p.label) + '">';
+      html += '<input class="param-value" data-param-custom="1" data-param-label="' + escapeAttr(p.label) + '" value="' + escapeAttr(p.value) + '"></div>';
+    });
+  }
+
+  html += '</div>';
+
+  /* 功能列表区 */
+  html += '<div class="section-title-edit"><span>支撑功能与固件状态 (' + c.functions.length + '项)</span><button class="btn-add-sm" onclick="addFuncRow()">+ 新增功能</button></div>';
+  html += '<div id="funcList">';
+  c.functions.forEach(function(f, idx) {
+    html += renderFuncRow(f, idx);
+  });
+  html += '</div>';
+
+  /* 保存按钮 */
+  html += '<div class="modal-save-bar"><button class="btn-save" onclick="saveCompEdit(\'' + c.id + '\')">保存修改</button></div>';
+
+  body.innerHTML = html;
+  document.getElementById("modalOverlay").classList.add("active");
+}
+
+function renderFuncRow(f, idx) {
+  var html = '<div class="func-row" data-func-idx="' + idx + '">';
+  html += '<div class="func-row-head">';
+  html += '<input class="fn-name" data-fn-field="name" value="' + escapeAttr(f.name || "") + '" placeholder="功能名称">';
+  html += '<select class="fn-status" data-fn-field="status">';
+  Object.keys(statusLabels).forEach(function(k) {
+    html += '<option value="' + k + '"' + (f.status === k ? ' selected' : '') + '>' + statusLabels[k] + '</option>';
+  });
+  html += '</select>';
+  html += '<div class="btn-del-sm" onclick="delFuncRow(this)">×</div>';
+  html += '</div>';
+  html += '<div class="func-row-body">';
+  html += '<div class="fn-field"><label>描述</label><input data-fn-field="desc" value="' + escapeAttr(f.desc || "") + '"></div>';
+  html += '<div class="fn-field"><label>固件</label><input data-fn-field="fw" value="' + escapeAttr(f.fw || "") + '"></div>';
+  html += '<div class="fn-field"><label>语言</label><input data-fn-field="lang" value="' + escapeAttr(f.lang || "") + '"></div>';
+  html += '<div class="fn-field"><label>负责人</label><input data-fn-field="owner" value="' + escapeAttr(f.owner || "") + '"></div>';
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function escapeAttr(s) {
+  if (s == null) return "";
+  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function addParamRow() {
+  var list = document.getElementById("paramList");
+  var div = document.createElement("div");
+  div.className = "param-row";
+  div.innerHTML = '<input class="param-label" value="新参数" data-param-custom="1" data-param-label="新参数">' +
+    '<input class="param-value" data-param-custom="1" data-param-label="新参数" value="">' +
+    '<div class="btn-del-sm" onclick="this.parentElement.remove()">×</div>';
+  list.appendChild(div);
+}
+
+function addFuncRow() {
+  var list = document.getElementById("funcList");
+  var idx = list.children.length;
+  var div = document.createElement("div");
+  div.innerHTML = renderFuncRow({name:"新功能",desc:"",fw:"",lang:"",owner:"",status:"todo"}, idx);
+  list.appendChild(div.firstChild);
+}
+
+function delFuncRow(btn) {
+  btn.closest(".func-row").remove();
+}
+
+function saveCompEdit(id) {
+  var c = components.find(function(x){return x.id === id;});
+  if (!c) return;
+
+  /* 收集固定参数 */
+  var fixedKeys = ["name","model","vendor","package","power","price","availability","alt","note"];
+  fixedKeys.forEach(function(key) {
+    var el = document.querySelector('.param-value[data-param-key="' + key + '"]');
+    if (el) c[key] = el.value;
+  });
+
+  /* 收集自定义参数 */
+  var customParams = [];
+  document.querySelectorAll('[data-param-custom="1"]').forEach(function(el) {
+    var label = el.getAttribute("data-param-label");
+    if (el.classList.contains("param-label")) {
+      var next = el.nextElementSibling;
+      if (next && next.classList.contains("param-value")) {
+        customParams.push({label: el.value, value: next.value});
+      }
+    }
+  });
+  c.customParams = customParams;
+
+  /* 收集功能列表 */
+  var funcs = [];
+  document.querySelectorAll("#funcList .func-row").forEach(function(row) {
+    var fn = {};
+    row.querySelectorAll("[data-fn-field]").forEach(function(field) {
+      fn[field.getAttribute("data-fn-field")] = field.value;
+    });
+    if (fn.name) funcs.push(fn);
+  });
+  c.functions = funcs;
+
+  /* 刷新画布和标题 */
+  renderCard();
+  renderSummary();
+  autoSave();
+  closeModal();
+  document.getElementById("hintBar").textContent = c.name + " 已保存";
+}
+
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("active");
+}
+
+document.getElementById("modalOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeModal();
+});
+
+/* ===== 自动优化布局：力导向算法 ===== */
+function autoLayout() {
+  if (components.length === 0) return;
+
+  var card = document.getElementById("pcieCard");
+  var cardW = card.clientWidth;
+  var cardH = card.clientHeight;
+
+  /* 构建邻接表 */
+  var adj = {};
+  components.forEach(function(c) { adj[c.id] = []; });
+  connections.forEach(function(conn) {
+    if (adj[conn.from]) adj[conn.from].push(conn.to);
+    if (adj[conn.to]) adj[conn.to].push(conn.from);
+  });
+
+  /* 连线数映射 */
+  var degree = {};
+  components.forEach(function(c) { degree[c.id] = adj[c.id].length; });
+
+  /* 初始化位置（用当前坐标，转为 0-1 归一化） */
+  var pos = {};
+  components.forEach(function(c) {
+    pos[c.id] = {
+      x: (c.x + c.w/2) / 100,
+      y: (c.y + c.h/2) / 100
+    };
+  });
+
+  /* 力导向参数 */
+  var ITERATIONS = 300;
+  var K_REPULSE = 0.0008;   /* 排斥力系数 */
+  var K_ATTRACT = 0.02;     /* 吸引力系数 */
+  var K_DAMPING = 0.85;     /* 阻尼 */
+  var MIN_DIST = 0.01;      /* 最小距离防除零 */
+  var EDGE_MARGIN = 0.02;   /* 边界边距 */
+
+  /* 速度 */
+  var vel = {};
+  components.forEach(function(c) { vel[c.id] = {x:0, y:0}; });
+
+  for (var iter = 0; iter < ITERATIONS; iter++) {
+    var force = {};
+    components.forEach(function(c) { force[c.id] = {x:0, y:0}; });
+
+    /* 排斥力：所有器件两两之间 */
+    for (var i = 0; i < components.length; i++) {
+      for (var j = i+1; j < components.length; j++) {
+        var a = components[i].id, b = components[j].id;
+        var dx = pos[a].x - pos[b].x;
+        var dy = pos[a].y - pos[b].y;
+        var dist = Math.sqrt(dx*dx + dy*dy);
+        dist = Math.max(MIN_DIST, dist);
+        /* 排斥力与距离反比 */
+        var rep = K_REPULSE / (dist * dist);
+        var fx = (dx / dist) * rep;
+        var fy = (dy / dist) * rep;
+        force[a].x += fx; force[a].y += fy;
+        force[b].x -= fx; force[b].y -= fy;
+      }
+    }
+
+    /* 吸引力：有连线的器件之间 */
+    connections.forEach(function(conn) {
+      var a = conn.from, b = conn.to;
+      if (!pos[a] || !pos[b]) return;
+      var dx = pos[b].x - pos[a].x;
+      var dy = pos[b].y - pos[a].y;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      dist = Math.max(MIN_DIST, dist);
+      /* 吸引力与距离成正比（弹簧模型） */
+      var attract = K_ATTRACT * dist;
+      var fx = (dx / dist) * attract;
+      var fy = (dy / dist) * attract;
+      force[a].x += fx; force[a].y += fy;
+      force[b].x -= fx; force[b].y -= fy;
+    });
+
+    /* 中心引力：防止器件飞散 */
+    var centerX = 0.5, centerY = 0.5;
+    components.forEach(function(c) {
+      var dx = centerX - pos[c.id].x;
+      var dy = centerY - pos[c.id].y;
+      force[c.id].x += dx * 0.001;
+      force[c.id].y += dy * 0.001;
+    });
+
+    /* 更新位置 */
+    components.forEach(function(c) {
+      vel[c.id].x = (vel[c.id].x + force[c.id].x) * K_DAMPING;
+      vel[c.id].y = (vel[c.id].y + force[c.id].y) * K_DAMPING;
+      pos[c.id].x += vel[c.id].x;
+      pos[c.id].y += vel[c.id].y;
+      /* 边界约束 */
+      pos[c.id].x = Math.max(EDGE_MARGIN + c.w/200, Math.min(1 - EDGE_MARGIN - c.w/200, pos[c.id].x));
+      pos[c.id].y = Math.max(EDGE_MARGIN + c.h/200, Math.min(1 - EDGE_MARGIN - c.h/200, pos[c.id].y));
+    });
+  }
+
+  /* 带动画地应用新位置 */
+  var animSteps = 30;
+  var startPos = {};
+  var endPos = {};
+  components.forEach(function(c) {
+    startPos[c.id] = {x: c.x, y: c.y};
+    endPos[c.id] = {
+      x: pos[c.id].x * 100 - c.w/2,
+      y: pos[c.id].y * 100 - c.h/2
+    };
+    /* 边界保护 */
+    endPos[c.id].x = Math.max(0, Math.min(100 - c.w, endPos[c.id].x));
+    endPos[c.id].y = Math.max(0, Math.min(100 - c.h, endPos[c.id].y));
+  });
+
+  var step = 0;
+  function animateLayout() {
+    step++;
+    var t = step / animSteps;
+    var ease = 1 - Math.pow(1 - t, 3); /* ease-out cubic */
+    components.forEach(function(c) {
+      c.x = startPos[c.id].x + (endPos[c.id].x - startPos[c.id].x) * ease;
+      c.y = startPos[c.id].y + (endPos[c.id].y - startPos[c.id].y) * ease;
+    });
+    renderCard();
+    if (step < animSteps) {
+      requestAnimationFrame(animateLayout);
+    } else {
+      autoSave();
+      document.getElementById("hintBar").textContent = "布局已优化：连线多的器件靠近，无连线器件分散";
+    }
+  }
+  animateLayout();
+}
+
+function renderSummary() {
+  var total = components.length;
+  var avail = components.filter(function(c){return c.availability === "available";}).length;
+  var limited = components.filter(function(c){return c.availability === "limited";}).length;
+  var allFuncs = [];
+  components.forEach(function(c){ allFuncs = allFuncs.concat(c.functions); });
+  var ready = allFuncs.filter(function(f){return f.status === "ready";}).length;
+  var dev = allFuncs.filter(function(f){return f.status === "dev";}).length;
+  var todo = allFuncs.filter(function(f){return f.status === "todo";}).length;
+  var totalFuncs = allFuncs.length;
+  var bar = document.getElementById("summaryBar");
+  bar.innerHTML = "";
+  bar.appendChild(makeSummaryCard(total, "器件总数"));
+  bar.appendChild(makeSummaryCard(avail, "可采购"));
+  bar.appendChild(makeSummaryCard(limited, "交期受限"));
+  bar.appendChild(makeSummaryCard(totalFuncs, "功能总数"));
+  bar.appendChild(makeSummaryCard(ready, "已就绪"));
+  bar.appendChild(makeSummaryCard(dev, "开发中"));
+  bar.appendChild(makeSummaryCard(todo, "未开始"));
+}
+
+function makeSummaryCard(num, label) {
+  var div = document.createElement("div");
+  div.className = "summary-card";
+  div.innerHTML = '<div class="summary-num">' + num + '</div><div class="summary-label">' + label + "</div>";
+  return div;
+}
+
+/* 图例标签修改：同步更新 availLabels 并刷新界面 */
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll(".legend-label").forEach(function(input) {
+    input.addEventListener("change", function() {
+      var key = this.getAttribute("data-avail-key");
+      var newLabel = this.value.trim() || availLabels[key];
+      this.value = newLabel;
+      availLabels[key] = newLabel;
+      /* 刷新画布上的器件框（class 不变，只是标签变化） */
+      /* 刷新统计栏和弹窗中引用 availLabels 的部分 */
+      renderSummary();
+      autoSave();
+    });
+  });
+});
+
+window.addEventListener("load", function() {
+  /* 尝试从 localStorage 恢复 */
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem("sca-board-data") || "null"); } catch(e) {}
+  if (saved) {
+    if (saved.components) {
+      /* 保留原始默认 components 的引用，替换内容 */
+      components.length = 0;
+      saved.components.forEach(function(c){ components.push(c); });
+    }
+    if (saved.connections) connections = saved.connections;
+    if (saved.availLabels) {
+      Object.keys(saved.availLabels).forEach(function(k){
+        if (availLabels[k] !== undefined) availLabels[k] = saved.availLabels[k];
+      });
+      /* 同步图例输入框 */
+      document.querySelectorAll(".legend-label").forEach(function(input) {
+        var key = input.getAttribute("data-avail-key");
+        if (saved.availLabels[key]) input.value = saved.availLabels[key];
+      });
+    }
+  } else {
+    /* 首次加载，初始化默认连线 */
+    if (connections.length === 0) {
+      connections = [
+        {from:"host-sw",to:"ctrl-fpga"},
+        {from:"ctrl-fpga",to:"main-fpga"},
+        {from:"main-fpga",to:"adc"},
+        {from:"adc",to:"lna"},
+        {from:"lna",to:"shunt"},
+        {from:"ctrl-fpga",to:"pll"},
+        {from:"pll",to:"main-fpga"},
+        {from:"ctrl-fpga",to:"usb"},
+        {from:"main-fpga",to:"sma"},
+        {from:"power",to:"main-fpga"}
+      ];
+    }
+  }
+  renderCard();
+  renderSummary();
+});
+
+/* ===== localStorage 自动持久化 ===== */
+var SAVE_KEY = "sca-board-data";
+var saveTimer = null;
+function autoSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function() {
+    try {
+      var data = {
+        components: components,
+        connections: connections,
+        availLabels: availLabels
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    } catch(e) { /* localStorage 满或禁用，静默 */ }
+  }, 300);
+}
+
+function resetData() {
+  if (!confirm("恢复到默认数据？当前所有修改将丢失。")) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+window.addEventListener("resize", function() {
+  renderCard();
+});
+</script>
+
+</body>
+</html>
