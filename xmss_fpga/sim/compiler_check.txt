@@ -1,0 +1,8 @@
+﻿gcc at C:\msys64\mingw64\bin: False
+gcc at C:\Strawberry\c\bin: False
+gcc at C:\TDM-GCC-64\bin: False
+gcc at C:\MinGW\bin: False
+gcc at C:\msys64\ucrt64\bin: False
+VS exists: False
+winget: C:\Users\pseclab\AppData\Local\Microsoft\WindowsApps\winget.exe
+PATH check:
