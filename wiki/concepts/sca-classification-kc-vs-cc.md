@@ -43,13 +43,27 @@
 ### 本论文的创新位置
 本文提出的合法密文 CC-SCA 模糊了 KC/CC 的传统边界：既拥有 CC 的攻击面优势，又使用合法密文（类似 KC），从而绕过所有检测型防护。
 
+### 扩展攻击模型
+
+| 攻击模型 | 描述 | 代表论文 |
+|---------|------|---------|
+| **盲 SCA** | 攻击者无法获取密文 | [[raw/paper-ravi2024-blind-sca-kyber]] (Kyber pointwise mult) |
+| **单迹 SCA** | 仅需一条迹线 | [[raw/paper-primas2017-single-trace-lattice]], [[raw/paper-pessl2019-practical-ntt]] |
+| **CC-SCA + 洗牌突破** | 构造恶意密文诱导 HW 分布变化 | [[raw/paper-zhang2025-cc-sca-shuffled-kyber]] |
+| **FI + SCA 组合** | 故障绕过防护 + SCA 恢复 | [[raw/paper-jendral2023-single-trace-masked-kyber]] |
+
 ## 关联
-- 相关实体: [[entities/kyber-kem]]
-- 相关概念: [[concepts/oracle-attacks-pc-fd-df]]
+- 相关实体: [[entities/kyber-kem]], [[entities/dilithium]]
+- 相关概念: [[concepts/oracle-attacks-pc-fd-df]], [[concepts/ntt-side-channel-attacks]], [[concepts/fault-injection]], [[concepts/deep-learning-sca]]
 - 参见: [[topics/sca-countermeasures-for-lattice-pqc]]
 
 ## 引用来源
 - [1] [[raw/paper-ravi2024-defeating-lcc]] — SCA 分类与对比
+- [2] [[raw/paper-ravi2022-sca-fia-survey]] — 系统性 SCA/FIA 分类综述
+- [3] [[raw/paper-ravi2024-blind-sca-kyber]] — 盲 SCA 新模型
+- [4] [[raw/paper-zhang2025-cc-sca-shuffled-kyber]] — CC-SCA 突破洗牌
+- [5] [[raw/paper-jendral2023-single-trace-masked-kyber]] — FI+SCA 组合
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
+- 2026-08-06: 更新——添加扩展攻击模型（盲 SCA、FI+SCA 组合），4 篇新引用

@@ -48,14 +48,23 @@
 - 最佳策略: 多层防护组合（检测 + 掩码 + 洗牌）
 
 ## 关联
-- 相关实体: [[entities/kyber-kem]], [[entities/pqm4-library]]
-- 相关概念: [[concepts/ciphertext-sanity-check]], [[concepts/decapsulation-failure-check]], [[concepts/greedy-solver]]
+- 相关实体: [[entities/kyber-kem]], [[entities/dilithium]], [[entities/pqm4-library]]
+- 相关概念: [[concepts/ciphertext-sanity-check]], [[concepts/decapsulation-failure-check]], [[concepts/greedy-solver]], [[concepts/ntt-side-channel-attacks]], [[concepts/fault-injection]]
 - 参见: [[topics/sca-countermeasures-for-lattice-pqc]]
 
 ## 引用来源
 - [1] [[raw/paper-ravi2024-defeating-lcc]] — 掩码和洗牌攻击适配
 - [2] [BGR+21] 掩码 Kyber 实现
 - [3] [HKL+22] mkm4 一阶掩码库
+- [4] [[raw/paper-hermelink2022-bp-shuffling-ntt]] — BP 突破洗牌（shuffle node）
+- [5] [[raw/paper-jendral2023-single-trace-masked-kyber]] — VFI 绕过洗牌 + DL 消息恢复
+- [6] [[raw/paper-bock2023-breaking-dpa-kyber]] — 模板攻击突破掩码（pair-pointwise mult）
+- [7] [[raw/paper-zhang2025-cc-sca-shuffled-kyber]] — CC-SCA 突破洗牌（MLP 分类器）
+- [8] [[raw/paper-coron2023-masked-dilithium-gadgets]] — Dilithium 高阶掩码 gadgets
+- [9] [[raw/paper-raj2024-mldsa-hardware-masking]] — ML-DSA 硬件一阶掩码
+- [10] [[raw/paper-hermelink2025-masked-mldsa-attack]] — 掩码 ML-DSA 最薄弱环节
+- [11] [[raw/paper-ravi2022-sca-fia-survey]] — SCA/FIA 综述及定制防护
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
+- 2026-08-06: 大幅更新——添加 7 篇掩码/洗牌攻击与防护论文（BP 突破洗牌、VFI 绕过、模板攻击、CC-SCA 突破、Dilithium 掩码 gadgets、硬件掩码、掩码 ML-DSA 攻击）

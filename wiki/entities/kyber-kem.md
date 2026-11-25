@@ -2,7 +2,7 @@
 
 > **类型**: entity
 > **创建时间**: 2026-08-05
-> **最后更新**: 2026-08-05
+> **最后更新**: 2026-08-06
 > **来源**: [[raw/paper-ravi2024-defeating-lcc]]
 
 ## 摘要
@@ -66,6 +66,7 @@ CRYSTALS-Kyber 是一种基于 Module Learning With Errors (MLWE) 问题的密�
 - 相关攻击: [[concepts/sca-classification-kc-vs-cc]], [[concepts/oracle-attacks-pc-fd-df]]
 - 相关防护: [[concepts/ciphertext-sanity-check]], [[concepts/decapsulation-failure-check]], [[concepts/masking-and-shuffling]]
 - 相关格约减: [[concepts/lwe-hints-framework]], [[concepts/lattice-reduction]], [[concepts/modular-hints]], [[concepts/distribution-hints]]
+- 相关攻击面: [[concepts/ntt-side-channel-attacks]], [[concepts/fault-injection]], [[concepts/deep-learning-sca]]
 - 相关团队: [[entities/ravi-research-group]]
 - 相关方案: [[entities/dilithium]], [[entities/nttru]]
 - 参见: [[topics/sca-countermeasures-for-lattice-pqc]], [[topics/lattice-reduction-attacks-on-lwe]], [[topics/comparison-ravi2024-vs-prior-work]]
@@ -81,9 +82,25 @@ CRYSTALS-Kyber 是一种基于 Module Learning With Errors (MLWE) 问题的密�
 - [8] [[raw/paper-dachman2023-geometric]] — 几何视角安全估计修正
 - [9] [[raw/paper-fouque2025-avengers]] — CBD 采样器单迹攻击，密钥生成阶段攻击面
 - [10] [[raw/paper-hhan2025-perfect-to-approx]] — 稀疏秘密 O(h log²h) 阈值（FHE 场景参考）
+- [11] [[raw/paper-primas2017-single-trace-lattice]] — 首个 Kyber NTT 单迹攻击（奠基）
+- [12] [[raw/paper-pessl2019-practical-ntt]] — 实用化 NTT 单迹攻击（213 模板）
+- [13] [[raw/paper-hermelink2022-bp-shuffling-ntt]] — BP 突破洗牌防护
+- [14] [[raw/paper-ravi2022-fiddling-twiddle-ntt]] — NTT twiddle 常数故障注入
+- [15] [[raw/paper-bock2023-breaking-dpa-kyber]] — 不完整 NTT pair-pointwise mult 模板攻击
+- [16] [[raw/paper-jendral2023-single-trace-masked-kyber]] — VFI+DL 组合攻击掩码+洗牌
+- [17] [[raw/paper-qiao2023-ntt-meets-sis]] — SIS 辅助恢复（64 系数即可）
+- [18] [[raw/paper-ravi2024-blind-sca-kyber]] — 首个盲 SCA（无需密文）
+- [19] [[raw/paper-zhang2025-cc-sca-shuffled-kyber]] — CC-SCA 突破洗牌（MLP 分类器）
+- [20] [[raw/paper-ravi2022-sca-fia-survey]] — SCA/FIA 综述（Ravi, ACM TECS 2024）
+- [21] [[raw/paper-pessl2021-fault-cca-kem]] — 首个格 KEM FI 攻击（FO 变换, TCHES 2021）
+- [22] [[raw/paper-hermelink2021-fault-cc-kyber]] — FI+CC 组合攻击（INDOCRYPT 2021）
+- [23] [[raw/paper-delvaux2022-roulette]] — Roulette 掩码反直觉攻击（TCHES 2022）
+- [24] [[raw/paper-valsaraj2025-randomness-fault-pqc]] — 种子指针 LFI 攻击，100% 成功率（2025）
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
 - 2026-08-05: 更新——添加 4 篇新论文的交叉引用（格约减攻击路线）
 - 2026-08-05: 更新——添加 DDGR 和几何视角两篇奠基论文引用
 - 2026-08-05: 更新——添加 Fouque (CBD 采样器攻击) 和 Hhan (稀疏秘密) 引用
+- 2026-08-06: 更新——添加 10 篇 SCA/FIA 论文引用（NTT 攻击、故障注入、洗牌突破、盲 SCA 等），新增 NTT/故障/DL 攻击面交叉引用
+- 2026-11-24: 更新——添加 4 篇故障注入论文引用（FO 变换 FI 奠基、Roulette、种子指针 LFI），Kyber FI 攻击面从 1 篇扩展到 5 篇

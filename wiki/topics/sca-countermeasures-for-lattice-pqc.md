@@ -47,10 +47,10 @@
 - 贪心求解器：使不等式密钥恢复效率翻倍
 
 ### 关键研究空白
-1. **Dilithium 签名方案的类似分析**：本文聚焦 Kyber，Dilithium 的低成本防护分析尚待研究
+1. ~~**Dilithium 签名方案的类似分析**~~: **已填补** — 见下方 Dilithium SCA/FIA 攻击面
 2. **更强检测型防护**：如何设计能抵抗公钥掩码的完整性检查？
 3. **合法密文攻击的扩展**：是否还有其他操作可被合法密文攻击利用？
-4. **硬件实现分析**：本文聚焦微控制器，ASIC/FPGA 实现的分析不同
+4. **硬件实现分析**：Raj 2024 已实现 ML-DSA 硬件掩码 [[raw/paper-raj2024-mldsa-hardware-masking]]
 5. **组合防护的最优配置**：检测+掩码+洗牌的成本-安全最优组合？
 
 ## 本文在知识库中的位置
@@ -81,9 +81,48 @@
 - Hermelink 2025 提出 BP 输出可集成到 primal attack 格——**两条路线可结合**
 - **防护启示**: 需同时防御确定性泄漏（防止格约减攻击）和概率性泄漏（防止贝叶斯攻击）
 
+## 更新：NTT/Dilithium/故障注入攻击路线（2026-08-06 增量）
+
+知识库新增 16 篇 SCA/FIA 论文后，防护全景进一步扩展：
+
+### NTT 攻击演进路线
+- **奠基** [[raw/paper-primas2017-single-trace-lattice]]: 首个 NTT 单迹攻击 (CHES 2017)
+- **实用化** [[raw/paper-pessl2019-practical-ntt]]: 常时间实现，213 模板 (LATINCRYPT 2019)
+- **洗牌突破** [[raw/paper-hermelink2022-bp-shuffling-ntt]]: shuffle node + BP (TCHES 2023)
+- **不完整 NTT 弱点** [[raw/paper-bock2023-breaking-dpa-kyber]]: pair-pointwise mult (ACNS 2024)
+- **SIS 辅助** [[raw/paper-qiao2023-ntt-meets-sis]]: 32-64 系数即可恢复 (2023)
+- **盲 SCA** [[raw/paper-ravi2024-blind-sca-kyber]]: 无需密文 (ICCAD 2023)
+- **CC-SCA + 洗牌突破** [[raw/paper-zhang2025-cc-sca-shuffled-kyber]]: MLP 97% 分类 (2025)
+- 详见 [[concepts/ntt-side-channel-attacks]]
+
+### Dilithium SCA/FIA 路线（填补知识空白）
+- **单迹 DL 攻击** [[raw/paper-wang2023-single-trace-dilithium]]: DL 辅助模板，9% 单迹 (2023)
+- **高效单迹** [[raw/paper-wang2024-single-trace-dilithium]]: CNN+线性回归，60% 单迹 (2024)
+- **掩码 ML-DSA 攻击** [[raw/paper-hermelink2025-masked-mldsa-attack]]: y 是最薄弱环节 (CRYPTO 2025)
+- **高阶掩码 gadgets** [[raw/paper-coron2023-masked-dilithium-gadgets]]: ShiftMod+布尔转换 (TCHES 2023)
+- **硬件掩码** [[raw/paper-raj2024-mldsa-hardware-masking]]: 首个 ML-DSA 硬件 (2024)
+- **NTT 故障** [[raw/paper-ravi2022-fiddling-twiddle-ntt]]: twiddle 常数 EMFI (2022)
+- **Keccak 故障** [[raw/paper-wang2024-keccak-fault]]: SHA-3 循环中止 (2024)
+
+### 故障注入路线
+- **NTT FI** [[raw/paper-ravi2022-fiddling-twiddle-ntt]]: EMFI 修改 twiddle 常数
+- **洗牌绕过** [[raw/paper-jendral2023-single-trace-masked-kyber]]: VFI + DL 组合
+- **Keccak FI** [[raw/paper-wang2024-keccak-fault]]: 循环中止故障，6 策略→8+7 攻击
+- 详见 [[concepts/fault-injection]]
+
+### 深度学习 SCA 路线
+- **CNN 模板** [[raw/paper-wang2024-single-trace-dilithium]]: cs1 恢复 74%
+- **MLP 分类** [[raw/paper-zhang2025-cc-sca-shuffled-kyber]]: HW 分类 97.11%
+- **DL+VFI 组合** [[raw/paper-jendral2023-single-trace-masked-kyber]]: 突破掩码+洗牌
+- **AdaBoost** [[raw/paper-fouque2025-avengers]]: CBD 采样器系数恢复
+- 详见 [[concepts/deep-learning-sca]]
+
+### 综述参考
+- [[raw/paper-ravi2022-sca-fia-survey]]: 最全面的 SCA/FIA 系统性综述 (ACM TECS 2024)
+
 ## 关联
 - 相关实体: [[entities/kyber-kem]], [[entities/ravi-research-group]], [[entities/pqm4-library]], [[entities/dilithium]], [[entities/nttru]], [[entities/hertzbleed]]
-- 相关概念: [[concepts/sca-classification-kc-vs-cc]], [[concepts/oracle-attacks-pc-fd-df]], [[concepts/ciphertext-sanity-check]], [[concepts/decapsulation-failure-check]], [[concepts/greedy-solver]], [[concepts/masking-and-shuffling]], [[concepts/lwe-hints-framework]], [[concepts/lattice-reduction]], [[concepts/modular-hints]], [[concepts/distribution-hints]]
+- 相关概念: [[concepts/sca-classification-kc-vs-cc]], [[concepts/oracle-attacks-pc-fd-df]], [[concepts/ciphertext-sanity-check]], [[concepts/decapsulation-failure-check]], [[concepts/greedy-solver]], [[concepts/masking-and-shuffling]], [[concepts/lwe-hints-framework]], [[concepts/lattice-reduction]], [[concepts/modular-hints]], [[concepts/distribution-hints]], [[concepts/ntt-side-channel-attacks]], [[concepts/fault-injection]], [[concepts/deep-learning-sca]]
 - 参见: [[topics/comparison-ravi2024-vs-prior-work]], [[topics/lattice-reduction-attacks-on-lwe]]
 
 ## 引用来源
@@ -99,8 +138,25 @@
 - [10] [[raw/paper-dachman2023-geometric]] — 几何视角扩展
 - [11] [[raw/paper-fouque2025-avengers]] — CBD 采样器攻击（密钥生成阶段新攻击面）
 - [12] [[raw/paper-hhan2025-perfect-to-approx]] — 稀疏秘密 O(h log²h) 阈值（FHE 防护启示）
+- [13] [[raw/paper-primas2017-single-trace-lattice]] — NTT 单迹攻击奠基 (CHES 2017)
+- [14] [[raw/paper-pessl2019-practical-ntt]] — 实用化 NTT 攻击 (LATINCRYPT 2019)
+- [15] [[raw/paper-hermelink2022-bp-shuffling-ntt]] — BP 突破洗牌 (TCHES 2023)
+- [16] [[raw/paper-ravi2022-sca-fia-survey]] — SCA/FIA 综述 (ACM TECS 2024)
+- [17] [[raw/paper-ravi2022-fiddling-twiddle-ntt]] — NTT 故障注入 (2022)
+- [18] [[raw/paper-bock2023-breaking-dpa-kyber]] — 不完整 NTT 弱点 (ACNS 2024)
+- [19] [[raw/paper-jendral2023-single-trace-masked-kyber]] — VFI+DL 组合 (HOST 2024)
+- [20] [[raw/paper-qiao2023-ntt-meets-sis]] — SIS 辅助恢复 (2023)
+- [21] [[raw/paper-ravi2024-blind-sca-kyber]] — 盲 SCA (ICCAD 2023)
+- [22] [[raw/paper-zhang2025-cc-sca-shuffled-kyber]] — CC-SCA 突破洗牌 (2025)
+- [23] [[raw/paper-wang2023-single-trace-dilithium]] — Dilithium DL 单迹 (2023)
+- [24] [[raw/paper-wang2024-single-trace-dilithium]] — Dilithium 高效单迹 (2024)
+- [25] [[raw/paper-hermelink2025-masked-mldsa-attack]] — 掩码 ML-DSA 攻击 (CRYPTO 2025)
+- [26] [[raw/paper-coron2023-masked-dilithium-gadgets]] — Dilithium 掩码 gadgets (TCHES 2023)
+- [27] [[raw/paper-raj2024-mldsa-hardware-masking]] — ML-DSA 硬件掩码 (2024)
+- [28] [[raw/paper-wang2024-keccak-fault]] — Keccak 故障攻击 (2024)
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
 - 2026-08-05: 更新——添加 DDGR 和几何视角两篇奠基论文来源
 - 2026-08-05: 更新——添加 Fouque (CBD 采样器新攻击面) 和 Hhan (FHE 稀疏秘密) 来源
+- 2026-08-06: 大幅更新——添加 16 篇 SCA/FIA 论文，新增 NTT 攻击/Dilithium SCA/故障注入/DL SCA 四条攻击路线，填补 Dilithium 知识空白

@@ -84,8 +84,8 @@ for each inequality i:
 Hermelink 2025 将贪心和 BP 统一在 [[concepts/distribution-hints|分布提示]] 框架下，证明此前特定攻击的算法都是这两个求解器的特例。
 
 ## 关联
-- 相关实体: [[entities/kyber-kem]], [[entities/ravi-research-group]]
-- 相关概念: [[concepts/decapsulation-failure-check]], [[concepts/masking-and-shuffling]], [[concepts/distribution-hints]], [[concepts/lwe-hints-framework]]
+- 相关实体: [[entities/kyber-kem]], [[entities/dilithium]], [[entities/ravi-research-group]]
+- 相关概念: [[concepts/decapsulation-failure-check]], [[concepts/masking-and-shuffling]], [[concepts/distribution-hints]], [[concepts/lwe-hints-framework]], [[concepts/ntt-side-channel-attacks]]
 - 参见: [[topics/sca-countermeasures-for-lattice-pqc]], [[topics/lattice-reduction-attacks-on-lwe]]
 
 ## 引用来源
@@ -93,7 +93,9 @@ Hermelink 2025 将贪心和 BP 统一在 [[concepts/distribution-hints|分布提
 - [2] [PP21] Pessl & Prokop, BP 方法原始论文
 - [3] [Del22] Delvaux, BP 改进
 - [4] [[raw/paper-hermelink2025-generic-framework]] — 理论统一：贪心是 BP 的近似
+- [5] [[raw/paper-hermelink2025-masked-mldsa-attack]] — 过滤技术：允许框架从大量 hints 中求解私钥（此前数值不稳定）
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
 - 2026-08-05: 更新——添加 Hermelink 2025 的理论统一分析和矛盾标注，来源 [[raw/paper-hermelink2025-generic-framework]]
+- 2026-08-06: 更新——添加 Hermelink 2025 CRYPTO 论文的过滤技术引用（解决大量 hints 的数值不稳定问题）

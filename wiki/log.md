@@ -97,3 +97,83 @@
 - 🔗 链接: [[raw/paper-fouque2025-avengers]] ↔ [[entities/kyber-kem]] (CBD 攻击面), [[concepts/lwe-hints-framework]] (way too many hints)
 - 🔗 链接: [[raw/paper-hhan2025-perfect-to-approx]] ↔ [[concepts/sparse-secret-lwe]], [[concepts/lwe-hints-framework]]
 - 📝 关键发现: Fouque 开辟密钥生成阶段新攻击面（CBD 采样器），Hhan 将 FHE 稀疏秘密的提示阈值从 O(n) 降至 O(h log²h)
+
+### Ingest: 16 篇 SCA/FIA 论文（全面覆盖 Kyber/Dilithium 侧信道攻击与防护）
+
+#### 新增 raw 摘要页 (16)
+- ✨ 新增: [[raw/paper-primas2017-single-trace-lattice]] — "Single-Trace SCA on Masked Lattice-Based Encryption" (CHES 2017) — **NTT 单迹攻击奠基**
+- ✨ 新增: [[raw/paper-pessl2019-practical-ntt]] — "More Practical Single-Trace Attacks on NTT" (LATINCRYPT 2019)
+- ✨ 新增: [[raw/paper-hermelink2022-bp-shuffling-ntt]] — "Adapting BP to Counter Shuffling of NTTs" (TCHES 2023)
+- ✨ 新增: [[raw/paper-ravi2022-sca-fia-survey]] — "SCA/FIA over Lattice-based PQC: Survey" (ACM TECS 2024) — **最全面综述**
+- ✨ 新增: [[raw/paper-ravi2022-fiddling-twiddle-ntt]] — "Fiddling the Twiddle Constants — NTT FI" (2022)
+- ✨ 新增: [[raw/paper-bock2023-breaking-dpa-kyber]] — "Breaking DPA-Protected Kyber via Pair-Pointwise Mult" (ACNS 2024)
+- ✨ 新增: [[raw/paper-coron2023-masked-dilithium-gadgets]] — "Improved Gadgets for High-Order Masking of Dilithium" (TCHES 2023)
+- ✨ 新增: [[raw/paper-jendral2023-single-trace-masked-kyber]] — "Single-Trace on Masked+Shuffled Kyber" (HOST 2024)
+- ✨ 新增: [[raw/paper-qiao2023-ntt-meets-sis]] — "When NTT Meets SIS: SCA on Dilithium and Kyber" (2023)
+- ✨ 新增: [[raw/paper-wang2023-single-trace-dilithium]] — "Single-Trace SCA on Dilithium: Myth or Reality?" (2023)
+- ✨ 新增: [[raw/paper-ravi2024-blind-sca-kyber]] — "ML-based Blind SCA on Kyber KEM" (ICCAD 2023)
+- ✨ 新增: [[raw/paper-wang2024-single-trace-dilithium]] — "Single Trace is All It Takes: Efficient SCA on Dilithium" (2024)
+- ✨ 新增: [[raw/paper-wang2024-keccak-fault]] — "Beware of Keccak: Fault Attacks on SHA-3" (2024)
+- ✨ 新增: [[raw/paper-raj2024-mldsa-hardware-masking]] — "Improved ML-DSA Hardware with First-Order Masking" (2024)
+- ✨ 新增: [[raw/paper-hermelink2025-masked-mldsa-attack]] — "Finding and Protecting Weakest Link in Masked ML-DSA" (CRYPTO 2025)
+- ✨ 新增: [[raw/paper-zhang2025-cc-sca-shuffled-kyber]] — "CC-SCA on Shuffled CRYSTALS-Kyber" (2025)
+
+#### 新增概念页 (3)
+- ✨ 新增: [[concepts/ntt-side-channel-attacks]] — NTT 侧信道攻击演进（2017-2025）
+- ✨ 新增: [[concepts/fault-injection]] — 故障注入攻击分类（NTT/洗牌/Keccak）
+- ✨ 新增: [[concepts/deep-learning-sca]] — 深度学习侧信道攻击方法分类
+
+#### 更新已有页面 (6)
+- 📝 更新: [[entities/kyber-kem]] — 添加 10 篇 SCA/FIA 论文引用，新增 NTT/故障/DL 攻击面交叉引用
+- 📝 更新: [[entities/dilithium]] — 大幅扩展：添加 Dilithium SCA 攻击面（单迹 DL、NTT+SIS、掩码攻击）、防护措施（高阶掩码、硬件掩码）、故障注入，共 8 篇新引用，**填补知识空白**
+- 📝 更新: [[entities/ravi-research-group]] — 添加 Ravi 团队 4 篇新论文（综述、NTT FI、盲 SCA、硬件掩码），扩展研究贡献至 9 项
+- 📝 更新: [[concepts/masking-and-shuffling]] — 添加 7 篇掩码/洗牌攻击与防护论文
+- 📝 更新: [[concepts/sca-classification-kc-vs-cc]] — 添加扩展攻击模型（盲 SCA、FI+SCA 组合）
+- 📝 更新: [[concepts/greedy-solver]] — 添加 Hermelink 2025 CRYPTO 过滤技术引用
+- 📝 更新: [[topics/sca-countermeasures-for-lattice-pqc]] — 新增 NTT 攻击/Dilithium SCA/故障注入/DL SCA 四条攻击路线，引用增至 28 篇
+
+#### 交叉引用建立
+- 🔗 链接: [[raw/paper-primas2017-single-trace-lattice]] ↔ [[concepts/ntt-side-channel-attacks]], [[entities/kyber-kem]]
+- 🔗 链接: [[raw/paper-hermelink2022-bp-shuffling-ntt]] ↔ [[concepts/ntt-side-channel-attacks]], [[concepts/masking-and-shuffling]]
+- 🔗 链接: [[raw/paper-ravi2022-fiddling-twiddle-ntt]] ↔ [[concepts/fault-injection]], [[concepts/ntt-side-channel-attacks]]
+- 🔗 链接: [[raw/paper-wang2023-single-trace-dilithium]] ↔ [[concepts/deep-learning-sca]], [[entities/dilithium]]
+- 🔗 链接: [[raw/paper-hermelink2025-masked-mldsa-attack]] ↔ [[entities/dilithium]], [[concepts/greedy-solver]]
+- 🔗 链接: [[raw/paper-coron2023-masked-dilithium-gadgets]] ↔ [[concepts/masking-and-shuffling]], [[entities/dilithium]]
+- 🔗 链接: [[raw/paper-ravi2022-sca-fia-survey]] ↔ 所有攻击/防护概念页（综述引用）
+- 🔗 链接: [[concepts/ntt-side-channel-attacks]] ↔ [[concepts/fault-injection]], [[concepts/deep-learning-sca]], [[concepts/masking-and-shuffling]]
+- 📝 知识空白填补: Dilithium 的 SCA/FIA 分析已从空白变为覆盖 8 篇论文（单迹攻击、NTT+SIS、掩码攻击、故障注入、掩码防护、硬件防护）
+- 📝 知识图谱完善: 知识库从"格约减攻击为主"扩展为"格约减 + NTT SCA + 故障注入 + 深度学习 SCA + Dilithium 专用"的多维度知识图谱
+
+### Ingest: 11 篇故障注入攻击论文（系统性检索 ML-KEM/ML-DSA FIA）
+
+#### 新增 raw 摘要页 (11)
+- ✨ 新增: [[raw/paper-bruinderink2018-dfa-deterministic-lattice]] — "Differential Fault Attacks on Deterministic Lattice Signatures" (TCHES 2018) — **格签名 FI 奠基**
+- ✨ 新增: [[raw/paper-pessl2021-fault-cca-kem]] — "Fault Attacks on CCA-secure Lattice KEMs" (TCHES 2021) — **格 KEM FI 奠基**
+- ✨ 新增: [[raw/paper-hermelink2021-fault-cc-kyber]] — "Fault-Enabled CC Attacks on Kyber" (INDOCRYPT 2021) — **FI+CC 组合**
+- ✨ 新增: [[raw/paper-delvaux2022-roulette]] — "Roulette: Diverse Fault Attacks on Masked Kyber" (TCHES 2022) — **掩码反直觉**
+- ✨ 新增: [[raw/paper-elghamrawy2023-mlwe-to-rlwe]] — "From MLWE to RLWE: DFA on Dilithium" (TCHES 2023) — **MLWE→RLWE 降维**
+- ✨ 新增: [[raw/paper-jendral2024-hedged-dilithium-fi]] — "Single Trace FI on Hedged Dilithium" (FDTC 2024) — **Hedged 单迹**
+- ✨ 新增: [[raw/paper-bauer2024-fault-resistant-ntt]] — "A Fault-Resistant NTT" (TCHES 2024) — **NTT FI 防护**
+- ✨ 新增: [[raw/paper-krahmer2024-correction-fault-dilithium]] — "Correction Fault Attacks on Randomized Dilithium" (TCHES 2024) — **校正故障**
+- ✨ 新增: [[raw/paper-mishra2024-probabilistic-fault-countermeasure]] — "Probabilistic Algorithms for Countering FI" (2024) — **概率化防护**
+- ✨ 新增: [[raw/paper-bauer2025-forging-dilithium-falcon]] — "Forging Dilithium and Falcon by Single FI" (FDTC 2023) — **验证绕过**
+- ✨ 新增: [[raw/paper-valsaraj2025-randomness-fault-pqc]] — "When Randomness Isn't Random: FI on PQ Standards" (2025) — **种子指针**
+
+#### 重构概念页 (1)
+- 📝 重构: [[concepts/fault-injection]] — 从 3 篇论文的 4 类分类**大幅重构**为 14 篇论文的 8 大类系统性分类，新增攻击目标全景图、故障防护措施表、演进链分析、Dilithium 专用分类
+
+#### 更新已有页面 (2)
+- 📝 更新: [[entities/kyber-kem]] — 添加 4 篇 FI 论文引用（FO 变换 FI 奠基、Roulette、FI+CC 组合、种子指针），Kyber FI 攻击面从 1 篇扩展到 5 篇
+- 📝 更新: [[entities/dilithium]] — 添加 6 篇 Dilithium 专用 FI 论文引用（DFA 奠基、MLWE→RLWE、校正故障、Hedged 单迹、验证绕过、种子指针），Dilithium FI 攻击面从 2 篇扩展到 8 篇
+
+#### 交叉引用建立
+- 🔗 链接: [[raw/paper-pessl2021-fault-cca-kem]] ↔ [[raw/paper-hermelink2021-fault-cc-kyber]] ↔ [[raw/paper-delvaux2022-roulette]] (FO 变换 FI 演进链)
+- 🔗 链接: [[raw/paper-bruinderink2018-dfa-deterministic-lattice]] ↔ [[raw/paper-elghamrawy2023-mlwe-to-rlwe]] ↔ [[raw/paper-krahmer2024-correction-fault-dilithium]] ↔ [[raw/paper-jendral2024-hedged-dilithium-fi]] (Dilithium FI 演进链)
+- 🔗 链接: [[raw/paper-elghamrawy2023-mlwe-to-rlwe]] ↔ [[concepts/lwe-hints-framework]] (使用 DDGR 框架)
+- 🔗 链接: [[raw/paper-valsaraj2025-randomness-fault-pqc]] ↔ [[entities/ravi-research-group]] (Ravi 团队)
+- 📝 关键发现: 
+  - FO 变换 FI 演进链: Pessl 2021 → Hermelink 2021 → Delvaux 2022 (从指令跳过到多样化故障模型)
+  - Dilithium FI 演进链: Bruinderink 2018 (确定性) → ElGhamrawy 2023 (随机化) → Krahmer 2024 (校正) + Jendral 2024 (hedged 单迹)
+  - 掩码反直觉: Delvaux 2022 证明掩码在某些 FI 场景中反而帮助攻击
+  - NIST 政策影响: Bruinderink 2018 对确定性模式的攻击直接导致 NIST 将 hedged 模式设为默认，但后续论文证明 hedged 同样可被攻击
+  - 种子指针: Valsaraj 2025 发现的随机种子指针单点故障影响 PQM4/LibOQS/PQClean/WolfSSL，成功率 100%
