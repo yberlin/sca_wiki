@@ -2,7 +2,7 @@
 
 > **类型**: topic
 > **创建时间**: 2026-08-05
-> **最后更新**: 2026-08-05
+> **最后更新**: 2026-11-25
 > **来源**: [[raw/paper-ravi2024-defeating-lcc]]
 
 ## 摘要
@@ -120,6 +120,44 @@
 ### 综述参考
 - [[raw/paper-ravi2022-sca-fia-survey]]: 最全面的 SCA/FIA 系统性综述 (ACM TECS 2024)
 
+## 更新：2025-2026 攻防前沿（2026-11-25 增量）
+
+系统性对照网上最新文献后，知识库补入七项关键进展，攻击与防护两端格局均有重大变化：
+
+### A. 微架构与实现级攻击路线（新增）
+- **GoFetch DMP 攻击** [[raw/paper-chen2024-gofetch]]: Apple M 系列 DMP 预取器端到端攻破常时间 Kyber/Dilithium（USENIX Security 2024，Pwnie 奖），Kyber-512 约 54 分钟——"恒时=安全"假设被硬件层推翻
+- **KyberSlash 除法时序** [[raw/paper-bernstein2025-kyberslash]]: 官方参考代码等大量实现的 `poly_frommsg`/`poly_compress` 含秘密依赖除法，远程计时分钟级恢复密钥（TCHES 2025）——实现级漏洞类别的代表
+- 详见新概念页 [[concepts/microarchitectural-sca]]
+
+### B. 持久故障/软件层故障注入（新增范式）
+- **Crowhammer** [[raw/paper-abouhaidar2025-crowhammer]]: Rowhammer 单比特翻转偏斜 Falcon RCDT → 数亿签名+PCA → 完全密钥恢复（CRYPTO 2025），无需物理注入设备
+- **SLasH-DSA**: SWAGE 框架对 OpenSSL SLH-DSA 全安全级别实现通用伪造（8h Rowhammer+36s 后处理）——哈希签名也非物理安全避风港
+- **Falcon 平方根故障** [[raw/paper-kaihara2026-falcon-sqrt]]: 单次 glitch+百万签名=100% 密钥恢复且故障签名不可区分——迄今最强 Falcon 故障攻击；同时证明平方根可从算法中整体删除
+- 详见 [[concepts/fault-injection]] E2 类别
+
+### C. 高阶掩码防护动态（防护再评估）
+- **Tosun 2025** [[raw/paper-tosun2025-nonprofiled-hocpa]]: 非剖析 HOCPA（sin/cos 最优预测函数）在 Cortex-M4 实测二阶/三阶掩码 Dilithium 仅 700/2400 迹、Kyber 2200/14500 迹完全恢复——无需克隆设备，掩码阶数边际防护价值重估
+- **bit-dropping 失效**: 通用对策对受保护格实现基本无效
+
+### D. Oracle 攻击效率新纪录
+- **LDPC DF 攻击** [[raw/paper-2026-ldpc-df-oracle]]: DF oracle + LDPC 信念传播 + 自适应查询设计，ML-KEM-768 仅 2950 查询（香农比 1.35）**首次超越二进制 PC oracle**；GoFetch 实例化后迹数再降一个数量级且去除格约减后处理
+- **PTA 拒绝采样攻击** [[raw/paper-zhao2026-rejection-matters]]: ML-DSA 拒绝+接受尝试泄漏并用公开数据构建模板（无需克隆设备），96 迹恢复 c、约 300 迹恢复密钥（10× 提升），hedged 模式不提供 SCA 防护
+- **密钥生成攻击面再确认**: Peng 2025 [[raw/paper-peng2025-adaptive-template-cbd]] 自适应模板（EM 算法）单迹跨设备攻击 Kyber CBD 采样器——继 Avengers 后密钥生成阶段脆弱性二次证实
+
+### E. 防护体系增量
+1. **实现级审计工具链**（新增必备项）: Valgrind 变时指令扫描（SUPERCOP 1000+ 实现）+ 形式化验证——KyberSlash 后部署前必查
+2. **掩码+实现审计组合**: 掩码防剖析攻击，但不能防实现级泄漏（KyberSlash 类）——两层缺一不可
+3. **持久故障对策**: Falcon 拒绝异常短签名（范数检查）、SLH-DSA 哈希重算冗余、Falcon 平方根删除——检测型防护在持久故障场景重新证明价值
+4. **微架构缓解**: 密文盲化（算法相关、开销大）、进程隔离（不充分）、硬件选择（Intel DMP 受限）——暂无廉价通用方案，开放难题
+5. **高安全部署建议**: 服务器远程场景至少需常时间+抗时序审计；嵌入式抗物理场景需掩码+洗牌+故障冗余+持续跟踪新攻击范式
+
+### F. 遗留研究空白更新
+1. ~~Dilithium 类似分析~~: 已填补（2026-08-06）
+2. **更强检测型防护**: 仍开放——公钥掩码抗性、持久故障抗性设计
+3. **合法密文攻击扩展**: 仍开放
+4. **微架构通用防护**: 新增高优先级——DMP/DVFS 类硬件泄漏无廉价软件对策
+5. **非剖析攻击下的防护度量**: 新增——掩码阶数与迹数的成本-安全曲线需重新标定（Tosun 2025 数据点）
+
 ## 关联
 - 相关实体: [[entities/kyber-kem]], [[entities/ravi-research-group]], [[entities/pqm4-library]], [[entities/dilithium]], [[entities/nttru]], [[entities/hertzbleed]]
 - 相关概念: [[concepts/sca-classification-kc-vs-cc]], [[concepts/oracle-attacks-pc-fd-df]], [[concepts/ciphertext-sanity-check]], [[concepts/decapsulation-failure-check]], [[concepts/greedy-solver]], [[concepts/masking-and-shuffling]], [[concepts/lwe-hints-framework]], [[concepts/lattice-reduction]], [[concepts/modular-hints]], [[concepts/distribution-hints]], [[concepts/ntt-side-channel-attacks]], [[concepts/fault-injection]], [[concepts/deep-learning-sca]]
@@ -154,9 +192,18 @@
 - [26] [[raw/paper-coron2023-masked-dilithium-gadgets]] — Dilithium 掩码 gadgets (TCHES 2023)
 - [27] [[raw/paper-raj2024-mldsa-hardware-masking]] — ML-DSA 硬件掩码 (2024)
 - [28] [[raw/paper-wang2024-keccak-fault]] — Keccak 故障攻击 (2024)
+- [29] [[raw/paper-chen2024-gofetch]] — GoFetch DMP 微架构攻击 (USENIX Security 2024)
+- [30] [[raw/paper-bernstein2025-kyberslash]] — KyberSlash 除法时序漏洞 (TCHES 2025)
+- [31] [[raw/paper-abouhaidar2025-crowhammer]] — Crowhammer Rowhammer 持久故障 (CRYPTO 2025)
+- [32] [[raw/paper-kaihara2026-falcon-sqrt]] — Falcon 平方根单故障攻击 (2026)
+- [33] [[raw/paper-tosun2025-nonprofiled-hocpa]] — 高阶非剖析攻击 (IACR CiC 2025)
+- [34] [[raw/paper-zhao2026-rejection-matters]] — ML-DSA 拒绝采样公开模板攻击 (ePrint 2026/056)
+- [35] [[raw/paper-2026-ldpc-df-oracle]] — DF oracle LDPC 混合攻击 (ePrint 2026/070)
+- [36] [[raw/paper-peng2025-adaptive-template-cbd]] — CBD 采样器自适应模板攻击 (TCHES 2025)
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
 - 2026-08-05: 更新——添加 DDGR 和几何视角两篇奠基论文来源
 - 2026-08-05: 更新——添加 Fouque (CBD 采样器新攻击面) 和 Hhan (FHE 稀疏秘密) 来源
 - 2026-08-06: 大幅更新——添加 16 篇 SCA/FIA 论文，新增 NTT 攻击/Dilithium SCA/故障注入/DL SCA 四条攻击路线，填补 Dilithium 知识空白
+- 2026-11-25: 大幅更新——对照 2025-2026 最新文献补入微架构攻击（GoFetch/KyberSlash）、持久故障范式（Crowhammer/SLasH-DSA/Falcon-sqrt）、高阶掩码非剖析攻破（Tosun）、DF oracle 效率翻案（LDPC）、拒绝采样攻击（PTA）、CBD 自适应模板六条路线，防护体系新增实现级审计工具链与微架构缓解小节

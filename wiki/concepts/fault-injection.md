@@ -2,8 +2,8 @@
 
 > **类型**: concept
 > **创建时间**: 2026-08-06
-> **最后更新**: 2026-11-24
-> **来源**: 14 篇论文（见引用来源）
+> **最后更新**: 2026-11-25
+> **来源**: 17 篇论文（见引用来源）
 
 ## 摘要
 
@@ -48,6 +48,16 @@
 |------|------|----------|----------|
 | [[raw/paper-valsaraj2025-randomness-fault-pqc]] | 2025 | LFI (种子指针) | **种子指针**: 100% 成功率，影响 PQM4/LibOQS/PQClean/WolfSSL |
 
+### E2. 持久故障/软件层故障注入（2025 新范式）
+
+| 论文 | 年份 | 故障模型 | 关键特点 |
+|------|------|----------|----------|
+| [[raw/paper-abouhaidar2025-crowhammer]] | 2025 | Rowhammer (RCDT 单比特翻转) | **软件层 FI**: 无物理接触，数亿签名+PCA→Falcon 完全密钥恢复，CRYPTO 2025 |
+| SLasH-DSA (姊妹工作) | 2025 | Rowhammer (SWAGE 框架) | **SLH-DSA 全级别通用伪造**: OpenSSL 3.5.1，8h Rowhammer+36s 后处理 |
+| [[raw/paper-kaihara2026-falcon-sqrt]] | 2026 | 单次 glitch (平方根计算) | **最强 Falcon FI**: 单故障+百万签名=100% 密钥恢复，故障签名不可区分 |
+
+> ⚠️ **范式转变标注**: 2025 年起故障注入从"物理注入设备（VFI/EMFI/LFI）"向"软件层持久故障（Rowhammer）"迁移。攻击门槛从"拥有物理接触的攻击者"降为"本地无特权软件攻击者"，攻击面数量级扩大。Falcon 的 RCDT 抗时序防护表与 SLH-DSA 的哈希树均被证明是持久故障的软肋。
+
 ### F. 洗牌绕过（FI+SCA 组合）
 
 | 论文 | 年份 | 故障模型 | 关键特点 |
@@ -82,6 +92,7 @@
 | VFI (电压) | Hermelink 2021, Jendral 2023, Jendral 2024 | 低成本，绕过洗牌/种子 | 低 |
 | EMFI (电磁) | Ravi 2022, Wang 2024 | 高精度，非侵入 | 中 |
 | LFI (激光) | Valsaraj 2025 | 高精度，高成功率 | 高 |
+| Rowhammer (软件层) | Crowhammer 2025, SLasH-DSA 2025 | **无需物理注入设备**，持久比特翻转 | 极低（纯软件） |
 
 ## 故障防护措施
 
@@ -119,10 +130,21 @@ ML-DSA (Dilithium)
 ├── NTT               ← Ravi 2022
 ├── Keccak/SHA-3      ← Wang 2024
 ├── 签名验证           ← Bauer 2025
+├── 拒绝采样泄漏        ← Zhao 2026 (SCA, 非 FI 但同为拒绝采样攻击面)
 └── 随机种子指针        ← Valsaraj 2025
+
+Falcon
+├── 高斯采样器 RCDT    ← Crowhammer 2025 (Rowhammer 持久故障)
+├── 平方根计算          ← Kaihara 2026 (单 glitch, 100% 恢复)
+└── 签名验证           ← Bauer 2025
+
+SLH-DSA (哈希签名)
+└── 哈希树/WOTS+/FORS ← SLasH-DSA 2025 (Rowhammer, 全安全级别通用伪造)
 
 NTT 通用              ← Ravi 2022 (攻击), Bauer 2024 (防护)
 ```
+
+> **2026-11 更新**: 攻击目标全景图新增 Falcon 专用条目（RCDT/平方根）与 SLH-DSA 哈希树条目。Falcon 作为 NIST 即将标准化的 FN-DSA，其实现安全风险（浮点、高斯采样、平方根）正在被系统性瓦解。
 
 ## 关联
 - NTT 故障: [[raw/paper-ravi2022-fiddling-twiddle-ntt]], [[raw/paper-bauer2024-fault-resistant-ntt]]
@@ -158,7 +180,10 @@ NTT 通用              ← Ravi 2022 (攻击), Bauer 2024 (防护)
 - [13] [[raw/paper-bauer2025-forging-dilithium-falcon]] — 验证绕过 (FDTC 2023)
 - [14] [[raw/paper-valsaraj2025-randomness-fault-pqc]] — 种子指针攻击 (2025)
 - [15] [[raw/paper-ravi2022-sca-fia-survey]] — SCA/FIA 综述
+- [16] [[raw/paper-abouhaidar2025-crowhammer]] — Rowhammer 持久故障攻击 Falcon (CRYPTO 2025)
+- [17] [[raw/paper-kaihara2026-falcon-sqrt]] — 平方根单故障攻击 Falcon (2026)
 
 ## 变更记录
 - 2026-08-06: 初始创建，涵盖 NTT/洗牌/Keccak 故障注入分类（3 篇论文）
 - 2026-11-24: **大幅重构**——系统性搜索 11 篇新论文后，按攻击目标重新分类为 8 大类（FO 变换/NTT/Keccak/验证绕过/随机数/洗牌/确定性 DFA/Hedged），新增攻击目标全景图、故障防护措施表、演进链分析
+- 2026-11-25: **范式更新**——新增 E2 持久故障/软件层故障注入类别（Crowhammer/SLasH-DSA/Falcon-sqrt），攻击目标全景图新增 Falcon 与 SLH-DSA 条目，故障方法总览表新增 Rowhammer 行

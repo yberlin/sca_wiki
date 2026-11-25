@@ -2,7 +2,7 @@
 
 > **类型**: concept
 > **创建时间**: 2026-08-05
-> **最后更新**: 2026-08-05
+> **最后更新**: 2026-11-25
 > **来源**: [[raw/paper-ravi2024-defeating-lcc]]
 
 ## 摘要
@@ -42,10 +42,19 @@
 | 洗牌 | 中 | 中 | ✓ (极端 HW 关联) |
 | 掩码 + 洗牌组合 | 很高 | 高 | ✓ (但迹数大幅增加) |
 
+### 高阶掩码的攻防动态（2025-2026 更新）
+
+高阶掩码曾被认为能显著抬升攻击成本，但 2025-2026 年两条战线同时告急：
+
+1. **非剖析高阶攻击**: Tosun 2025 [[raw/paper-tosun2025-nonprofiled-hocpa]] 用 HOCPA + sin/cos 最优预测函数，在 Cortex-M4 上以 700/2400 迹攻破二阶/三阶掩码 Dilithium、2200/14500 迹攻破二阶/三阶掩码 Kyber——**无需克隆设备**，且证明 bit-dropping 等通用对策对受保护格实现基本无效。
+2. **最薄弱环节转移**: Hermelink 2025 [[raw/paper-hermelink2025-masked-mldsa-attack]] 已证明掩码 ML-DSA 中 y 多项式是最薄弱环节（CRYPTO 2025）。
+3. **防护设计要点**: 掩码阶数提升的边际防护价值需重新评估——每加一阶约线性增加开销，但非剖析攻击所需迹数增幅有限（Dilithium 二阶→三阶仅 700→2400 迹）。带符号算术的符号依赖泄漏是实现层需规避的新泄漏源（Tosun 2025 发现）。
+
 ### 设计启示
 - 低成本检测型防护**不能**提供独立防护
 - 标准防护（掩码+洗牌）增加成本但**不阻止**攻击
 - 最佳策略: 多层防护组合（检测 + 掩码 + 洗牌）
+- **新增**: 掩码需与泄漏模型审计（如 KyberSlash 式变时指令扫描、Valgrind 补丁/形式化工具）配合，防止"掩码未破而实现先漏"
 
 ## 关联
 - 相关实体: [[entities/kyber-kem]], [[entities/dilithium]], [[entities/pqm4-library]]
@@ -64,7 +73,10 @@
 - [9] [[raw/paper-raj2024-mldsa-hardware-masking]] — ML-DSA 硬件一阶掩码
 - [10] [[raw/paper-hermelink2025-masked-mldsa-attack]] — 掩码 ML-DSA 最薄弱环节
 - [11] [[raw/paper-ravi2022-sca-fia-survey]] — SCA/FIA 综述及定制防护
+- [12] [[raw/paper-tosun2025-nonprofiled-hocpa]] — 高阶非剖析攻击突破二阶/三阶掩码（IACR CiC 2025）
+- [13] [[raw/paper-bernstein2025-kyberslash]] — 变时除法漏洞（掩码之外的实现级泄漏警示）
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
 - 2026-08-06: 大幅更新——添加 7 篇掩码/洗牌攻击与防护论文（BP 突破洗牌、VFI 绕过、模板攻击、CC-SCA 突破、Dilithium 掩码 gadgets、硬件掩码、掩码 ML-DSA 攻击）
+- 2026-11-25: 更新——新增高阶掩码攻防动态（Tosun 2025 非剖析 HOCPA 攻破三阶掩码、KyberSlash 实现级泄漏警示）

@@ -1,5 +1,47 @@
 # 变更日志
 
+## 2026-11-25
+
+### Ingest: 网上对照巡检——2025-2026 攻防前沿系统补齐（8 篇新论文）
+
+对照网上最新文献（TCHES/CRYPTO/USENIX/CiC/ePrint 2024-2026）系统性检查知识库完备性，发现六类缺口并全部补齐。
+
+#### 新增 raw 摘要页 (8)
+- ✨ 新增: [[raw/paper-bernstein2025-kyberslash]] — "KyberSlash: 秘密依赖除法时序" (TCHES 2025) — **实现级时序漏洞类别**
+- ✨ 新增: [[raw/paper-chen2024-gofetch]] — "GoFetch: DMP 预取器攻击常时间 Kyber/Dilithium" (USENIX Security 2024) — **微架构攻击类别**
+- ✨ 新增: [[raw/paper-abouhaidar2025-crowhammer]] — "Crowhammer: Rowhammer 攻击 Falcon RCDT" (CRYPTO 2025) — **持久故障类别**
+- ✨ 新增: [[raw/paper-kaihara2026-falcon-sqrt]] — "Square Root of All Evil: Falcon 平方根单故障攻击" (2026) — **Falcon 专用 FI**
+- ✨ 新增: [[raw/paper-tosun2025-nonprofiled-hocpa]] — "Non-Profiled Higher-Order SCA against LBC" (IACR CiC 2025) — **高阶掩码非剖析攻破**
+- ✨ 新增: [[raw/paper-zhao2026-rejection-matters]] — "Rejection Matters: ML-DSA 拒绝采样公开模板攻击" (ePrint 2026/056) — **拒绝采样泄漏**
+- ✨ 新增: [[raw/paper-2026-ldpc-df-oracle]] — "Unlocking DF Oracles: LDPC 混合攻击" (ePrint 2026/070) — **DF oracle 效率翻案**
+- ✨ 新增: [[raw/paper-peng2025-adaptive-template-cbd]] — "Adaptive Template Attacks on Kyber CBD Sampler" (TCHES 2025) — **密钥生成攻击面再确认**
+
+#### 新增概念页 (1)
+- ✨ 新增: [[concepts/microarchitectural-sca]] — 微架构侧信道攻击（GoFetch/KyberSlash/Hertzbleed 三路线统一视图），填补"非物理接触类攻击"知识空白
+
+#### 更新已有页面 (5)
+- 📝 更新: [[concepts/fault-injection]] — 新增 E2 持久故障/软件层故障注入类别（Crowhammer/SLasH-DSA/Falcon-sqrt），故障方法表新增 Rowhammer 行，攻击目标全景图新增 Falcon 与 SLH-DSA 条目
+- 📝 更新: [[concepts/masking-and-shuffling]] — 新增高阶掩码攻防动态（Tosun 三阶掩码 2400 迹攻破、bit-dropping 失效、带符号算术泄漏、KyberSlash 实现级审计警示）
+- 📝 更新: [[concepts/oracle-attacks-pc-fd-df]] — DF oracle 效率翻案（LDPC 2950 查询超越 PC oracle、香农比 1.35），新增 KyberSlash 实现级时序 oracle 小节
+- 📝 更新: [[topics/sca-countermeasures-for-lattice-pqc]] — 新增 2025-2026 攻防前沿章节（六条攻击路线 A-F），防护体系新增实现级审计工具链、微架构缓解、持久故障对策，引用来源扩至 36 篇
+- 📝 更新: wiki/index.md — 索引更新至 30 wiki 页面 + 44 raw 页面
+
+#### 交叉引用建立
+- 🔗 链接: [[raw/paper-chen2024-gofetch]] ↔ [[concepts/microarchitectural-sca]], [[concepts/lwe-hints-framework]] (DMP 泄漏→格约减后处理)
+- 🔗 链接: [[raw/paper-bernstein2025-kyberslash]] ↔ [[concepts/oracle-attacks-pc-fd-df]], [[entities/hertzbleed]] (恒时性迷思对照)
+- 🔗 链接: [[raw/paper-abouhaidar2025-crowhammer]] ↔ [[raw/paper-kaihara2026-falcon-sqrt]] (Tibouchi 团队 Falcon FI 双联作) ↔ [[raw/paper-bauer2025-forging-dilithium-falcon]] (Falcon 签名/验证两端单故障)
+- 🔗 链接: [[raw/paper-tosun2025-nonprofiled-hocpa]] ↔ [[concepts/masking-and-shuffling]], [[raw/paper-coron2023-masked-dilithium-gadgets]] (gadget 安全证明≠实现安全)
+- 🔗 链接: [[raw/paper-zhao2026-rejection-matters]] ↔ [[entities/dilithium]], [[raw/paper-jendral2024-hedged-dilithium-fi]] (hedged 无 SCA/FI 防护双重证明)
+- 🔗 链接: [[raw/paper-2026-ldpc-df-oracle]] ↔ [[concepts/oracle-attacks-pc-fd-df]], [[concepts/greedy-solver]] (BP 家族从求解器扩展为查询编码器)
+- 🔗 链接: [[raw/paper-peng2025-adaptive-template-cbd]] ↔ [[raw/paper-fouque2025-avengers]] (CBD 采样器攻击工具箱扩充)
+- 📝 关键发现:
+  - 故障注入范式转变: 2025 年起从物理注入（VFI/EMFI/LFI）向软件层持久故障（Rowhammer）迁移，攻击门槛降为无特权本地软件攻击者
+  - 恒时实现三重打击: GoFetch（DMP 硬件层）、KyberSlash（除法器实现层）、Hertzbleed（DVFS 频率层）共同证明"常时间编码≠物理安全"
+  - 掩码防护重定价: 三阶掩码 Dilithium 2400 迹即被非剖析攻破，阶数提升边际价值需重估
+  - DF oracle 登顶: LDPC 信念传播使 DF oracle 首次超越 PC oracle，oracle 攻击效率排序被改写
+  - hedged 模式双重失守: FI（Jendral 2024）与 SCA（Zhao 2026）两线证明 hedging 不提供物理安全防护
+  - Falcon 实现安全系统性瓦解: RCDT（Rowhammer）+ 平方根（单 glitch）+ 验证（Bauer 2025），FN-DSA 标准化前夜实现风险全面暴露
+
 ## 2026-08-05
 
 ### Ingest: 论文 "Defeating Low-Cost Countermeasures against SCA in Lattice-based Encryption" (TCHES 2024)

@@ -2,7 +2,7 @@
 
 > **类型**: concept
 > **创建时间**: 2026-08-05
-> **最后更新**: 2026-08-05
+> **最后更新**: 2026-11-25
 > **来源**: [[raw/paper-ravi2024-defeating-lcc]]
 
 ## 摘要
@@ -33,6 +33,12 @@ CC-based SCA 利用特制恶意密文，使解密后的消息与秘密密钥相�
 - **迹数**: ≈6500-7000 密文查询 (Kyber768)
 - **求解器**: 基于置信传播（Belief Propagation）[PP21, Del22]
 - **防护**: 可被解封装失败检查拦截（单次失败即刷新密钥）
+- **2026 效率翻案**: [[raw/paper-2026-ldpc-df-oracle]] 用 LDPC 信念传播+自适应查询设计，ML-KEM-768（95% 准确 oracle）仅需 **2950 次查询**（香农下界之比 1.35），**首次超越 SOTA 二进制 PC 攻击**——DF oracle 从"最差 oracle"跃升为效率之最；实例化 GoFetch 微架构泄漏后迹数再降一个数量级
+
+### 时序型 Oracle：KyberSlash（2025 实现级警示）
+- **文献**: [[raw/paper-bernstein2025-kyberslash]] (TCHES 2025)
+- **原理**: 并非算法层 oracle，而是 `poly_frommsg`/`poly_compress` 中秘密依赖除法指令的变时执行——远程计时即可逐位恢复密钥（KyberSlash2 分钟级）
+- **启示**: oracle 攻击分类（PC/FD/DF）之外，**实现层"意外 oracle"**（除法时序、分支差异）同样致命；检测需 Valgrind 变时指令扫描或形式化验证，而非仅靠代码审查
 
 ### 本论文对三者的影响
 
@@ -49,6 +55,9 @@ CC-based SCA 利用特制恶意密文，使解密后的消息与秘密密钥相�
 
 ## 引用来源
 - [1] [[raw/paper-ravi2024-defeating-lcc]] — Oracle 攻击分类与对比
+- [2] [[raw/paper-2026-ldpc-df-oracle]] — DF oracle LDPC 信念传播效率翻案 (ePrint 2026/070)
+- [3] [[raw/paper-bernstein2025-kyberslash]] — 实现级时序 oracle（KyberSlash）
 
 ## 变更记录
 - 2026-08-05: 初始创建，来源 [[raw/paper-ravi2024-defeating-lcc]]
+- 2026-11-25: 更新——新增 DF oracle 效率翻案（LDPC 攻击 2950 查询超越 PC oracle）与 KyberSlash 实现级时序 oracle 小节

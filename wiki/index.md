@@ -1,6 +1,6 @@
 # Wiki 索引
 
-> 总页面数: 28 | 最后更新: 2026-11-24
+> 总页面数: 30 | 最后更新: 2026-11-25
 
 ## 按类型
 
@@ -12,13 +12,13 @@
 - [[entities/ravi-research-group]] — Prasanna Ravi 领衔的格基密码 SCA 研究团队
 - [[entities/pqm4-library]] — ARM Cortex-M4 上的后量子密码实现库
 
-### 概念 (15)
+### 概念 (16)
 - [[concepts/sca-classification-kc-vs-cc]] — 侧信道攻击分类：已知密文 vs 选择密文
-- [[concepts/oracle-attacks-pc-fd-df]] — 三种 Oracle 攻击：PC / FD / DF
+- [[concepts/oracle-attacks-pc-fd-df]] — 三种 Oracle 攻击：PC / FD / DF（含 DF 效率翻案与时序 oracle）
 - [[concepts/ciphertext-sanity-check]] — 密文完整性检查防护
 - [[concepts/decapsulation-failure-check]] — 解封装失败检查防护
 - [[concepts/greedy-solver]] — 贪心求解器用于线性不等式密钥恢复
-- [[concepts/masking-and-shuffling]] — 掩码与洗牌防护
+- [[concepts/masking-and-shuffling]] — 掩码与洗牌防护（含高阶掩码攻防动态）
 - [[concepts/lwe-hints-framework]] — LWE with Hints 框架：DDGR → 几何扩展 → MN → Cao → Fouque → Hhan 演进
 - [[concepts/modular-hints]] — 模提示：mod-q 提示的线性代数降维
 - [[concepts/lattice-reduction]] — 格约减攻击：LLL 与 BKZ
@@ -26,17 +26,18 @@
 - [[concepts/dbdd]] — DBDD（畸变有界距离解码）：LWE→uSVP 的中间问题
 - [[concepts/sparse-secret-lwe]] — 稀疏三值秘密 LWE：O(h log²h) 提示恢复阈值
 - [[concepts/ntt-side-channel-attacks]] — NTT 侧信道攻击：从 Primas 2017 到 Zhang 2025 的演进
-- [[concepts/fault-injection]] — 故障注入攻击：8 大类分类（FO 变换/NTT/Keccak/验证/随机数/洗牌/DFA/Hedged）
+- [[concepts/fault-injection]] — 故障注入攻击：8 大类分类 + 持久故障（Rowhammer）新范式
 - [[concepts/deep-learning-sca]] — 深度学习侧信道攻击：CNN/MLP/AdaBoost 方法
+- [[concepts/microarchitectural-sca]] — 微架构侧信道攻击：GoFetch/KyberSlash/Hertzbleed 三路线
 
 ### 主题 (3)
-- [[topics/sca-countermeasures-for-lattice-pqc]] — 格基 PQC 的侧信道防护全景综述
+- [[topics/sca-countermeasures-for-lattice-pqc]] — 格基 PQC 的侧信道防护全景综述（含 2025-2026 攻防前沿）
 - [[topics/comparison-ravi2024-vs-prior-work]] — Ravi 2024 与已有 CC-SCA 工作的对比分析
 - [[topics/lattice-reduction-attacks-on-lwe]] — 格约减攻击 LWE with Hints 全景
 
 ## 按来源
 
-### 原始资料 (36)
+### 原始资料 (44)
 #### 格约减攻击路线 (9)
 - [[raw/paper-ddgr2020-lwe-side-info]] — "LWE with Side Information" (CRYPTO 2020) — **奠基论文**
 - [[raw/paper-dachman2023-geometric]] — "Revisiting Security Estimation for LWE with Hints from a Geometric Perspective" (CRYPTO 2023)
@@ -82,3 +83,13 @@
 #### 综述与硬件 (2)
 - [[raw/paper-ravi2022-sca-fia-survey]] — "SCA and FIA over Lattice-based PQC (Kyber, Dilithium): Survey" (ACM TECS 2024) — **最全面综述**
 - [[raw/paper-raj2024-mldsa-hardware-masking]] — "Improved ML-DSA Hardware with First-Order Masking" (2024)
+
+#### 2025-2026 前沿补充 (8)
+- [[raw/paper-bernstein2025-kyberslash]] — "KyberSlash: Exploiting secret-dependent division timings" (TCHES 2025) — **实现级时序漏洞，官方参考代码中招**
+- [[raw/paper-chen2024-gofetch]] — "GoFetch: Breaking Constant-Time via DMPs" (USENIX Security 2024) — **Apple DMP 微架构攻击 Kyber/Dilithium**
+- [[raw/paper-abouhaidar2025-crowhammer]] — "Crowhammer: Rowhammer Attack on Falcon" (CRYPTO 2025) — **软件层持久故障，Falcon RCDT**
+- [[raw/paper-kaihara2026-falcon-sqrt]] — "Square Root of All Evil" (2026) — **单故障 100% Falcon 密钥恢复**
+- [[raw/paper-tosun2025-nonprofiled-hocpa]] — "Non-Profiled Higher-Order SCA against LBC" (IACR CiC 2025) — **三阶掩码非剖析攻破**
+- [[raw/paper-zhao2026-rejection-matters]] — "Rejection Matters: ML-DSA via Public Templates" (ePrint 2026/056) — **拒绝采样泄漏+公开模板**
+- [[raw/paper-2026-ldpc-df-oracle]] — "Unlocking DF Oracles: LDPC Attack on ML-KEM" (ePrint 2026/070) — **DF oracle 效率超越 PC**
+- [[raw/paper-peng2025-adaptive-template-cbd]] — "Adaptive Template Attacks on Kyber's Binomial Sampler" (TCHES 2025) — **跨设备单迹 CBD 攻击**
